@@ -39,7 +39,11 @@ function formatMonthLabel(isoDate: string): string {
   return `${d.getFullYear()}년 ${d.getMonth() + 1}월`;
 }
 
-function WeeklyCalendar() {
+interface WeeklyCalendarProps {
+  onSelectDate: (date: string) => void;
+}
+
+function WeeklyCalendar({ onSelectDate }: WeeklyCalendarProps) {
   const [anchorDate, setAnchorDate] = useState(TODAY_ISO);
   const weekDates = getWeekDates(anchorDate);
   const monthLabel = formatMonthLabel(weekDates[0]);
@@ -84,7 +88,12 @@ function WeeklyCalendar() {
           const categories = getCategoriesByDate(date).slice(0, MAX_TAGS_PER_DAY);
 
           return (
-            <div key={date} className="flex flex-col items-center gap-2">
+            <button
+              key={date}
+              type="button"
+              onClick={() => onSelectDate(date)}
+              className="flex flex-col items-center gap-2"
+            >
               <span
                 className={`text-caption leading-none font-medium ${
                   isSunday ? "text-brand" : isSaturday ? "text-gray-900" : "text-gray-400"
@@ -114,7 +123,7 @@ function WeeklyCalendar() {
                   </span>
                 ))}
               </div>
-            </div>
+            </button>
           );
         })}
       </div>
