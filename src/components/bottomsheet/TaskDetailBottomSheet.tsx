@@ -22,6 +22,7 @@ interface TaskDetailBottomSheetProps {
   choreId: number
   members?: MemberOption[]
   onStatusUpdated?: (updatedChore: ChoreBoardItem) => void
+  onClose?: () => void
 }
 
 function findChoreById(board: ChoreBoardResponse, choreId: number) {
@@ -35,6 +36,7 @@ export default function TaskDetailBottomSheet({
   choreId,
   members = [],
   onStatusUpdated,
+  onClose,
 }: TaskDetailBottomSheetProps) {
   const [chore, setChore] = useState<ChoreBoardItem | null>(null)
   const [selectedStatus, setSelectedStatus] = useState<ChoreStatusOption>('pending')
@@ -98,7 +100,7 @@ export default function TaskDetailBottomSheet({
 
   if (isLoading || !chore) {
     return (
-      <Layout>
+      <Layout onClose={onClose}>
         <div className="flex min-h-[240px] w-full items-center justify-center">
           <p className="text-body-02 font-medium text-gray leading-[1.5]">불러오는 중...</p>
         </div>
@@ -107,7 +109,7 @@ export default function TaskDetailBottomSheet({
   }
 
   return (
-    <Layout>
+    <Layout onClose={onClose}>
       <div className='flex flex-col items-start gap-1'>
         {/* 제목 */}
         <div className='flex w-full items-center justify-between'>
