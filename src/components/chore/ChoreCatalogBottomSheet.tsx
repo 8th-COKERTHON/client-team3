@@ -42,7 +42,7 @@ export default function ChoreCatalogBottomSheet({ onClose }: Props) {
 
       <button
         type="button"
-        className="w-full text-left px-4 py-3 rounded-xl bg-gray-100 mb-4 text-sm text-gray-500"
+        className="text-left px-4 py-3 rounded-xl bg-gray-100 mb-4 text-sm text-gray-500"
         onClick={() => navigate("/chores/add")}
       >
         + 새 과업 추가하기
@@ -64,7 +64,7 @@ export default function ChoreCatalogBottomSheet({ onClose }: Props) {
                     onClick={() => setSelected(task)}
                     className={`px-3 py-2 rounded-full border text-sm ${
                       isSelected
-                        ? "bg-rose-500 text-white border-rose-500"
+                        ? "bg-rose-500 text-white border-brand-500"
                         : "bg-gray-50 border-gray-200 text-gray-700"
                     }`}
                   >
