@@ -13,9 +13,10 @@ interface FamilyFilterProps {
   members: FamilyMember[];
   activeId: FilterId;
   onSelect: (id: FilterId) => void;
+  onInviteClick?: () => void;
 }
 
-function FamilyFilter({ members, activeId, onSelect }: FamilyFilterProps) {
+function FamilyFilter({ members, activeId, onSelect, onInviteClick }: FamilyFilterProps) {
   return (
     // 가족 구성원 필터 섹션
     <section className="w-full">
@@ -104,7 +105,11 @@ function FamilyFilter({ members, activeId, onSelect }: FamilyFilterProps) {
         })}
 
         {/* 가족 구성원 초대 칩 */}
-        <button type="button" className="flex w-12 shrink-0 flex-col items-center gap-1.5">
+        <button
+          type="button"
+          onClick={onInviteClick}
+          className="flex w-12 shrink-0 flex-col items-center gap-1.5"
+        >
           <span className="flex h-11 w-11 items-center justify-center rounded-full border border-gray-300 bg-[#F5F5FA]">
             <Plus size={16} strokeWidth={1.5} className="text-gray-400" />
           </span>

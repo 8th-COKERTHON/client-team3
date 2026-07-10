@@ -36,6 +36,16 @@ function buildRouletteMembers(
     }))
 }
 
+function getNormalizedRatio(member: RouletteMember, members: RouletteMember[]) {
+  const totalRatio = members.reduce((sum, currentMember) => sum + currentMember.shareRatio, 0)
+
+  if (totalRatio <= 0) {
+    return 0
+  }
+
+  return member.shareRatio / totalRatio
+}
+
 function getWeightedWinnerIndex(members: RouletteMember[]) {
   const totalRatio = members.reduce((sum, member) => sum + member.shareRatio, 0)
   const randomPoint = Math.random() * totalRatio
@@ -57,6 +67,15 @@ function formatGradient(segments: RouletteSegment[]) {
   return `conic-gradient(${segments
     .map((segment) => `${segment.color} ${segment.startAngle}deg ${segment.endAngle}deg`)
     .join(', ')})`
+}
+
+function getLabelPosition(centerAngle: number, radius: number) {
+  const angleInRadians = ((centerAngle - 90) * Math.PI) / 180
+
+  return {
+    x: Math.cos(angleInRadians) * radius,
+    y: Math.sin(angleInRadians) * radius,
+  }
 }
 
 export default function RouletteBottomSheet({
@@ -100,7 +119,7 @@ export default function RouletteBottomSheet({
     let currentAngle = 0
 
     return rouletteMembers.map((member, index) => {
-      const segmentAngle = member.shareRatio * 360
+      const segmentAngle = getNormalizedRatio(member, rouletteMembers) * 360
       const segment: RouletteSegment = {
         ...member,
         color: ROULETTE_COLORS[index % ROULETTE_COLORS.length],
@@ -204,14 +223,14 @@ export default function RouletteBottomSheet({
                 style={wheelStyle}
               >
                 {rouletteSegments.map((segment) => {
-                  const labelAngle = segment.centerAngle - 90
+                  const { x, y } = getLabelPosition(segment.centerAngle, 50)
                   return (
                     <div
                       key={segment.memberId}
-                      className="absolute left-1/2 top-1/2 text-caption font-bold leading-none text-white"
+                      className="absolute flex w-[72px] -translate-x-1/2 -translate-y-1/2 justify-center text-center text-caption font-bold leading-none text-white"
                       style={{
-                        transform: `rotate(${labelAngle}deg) translateY(-66px) rotate(${-labelAngle}deg)`,
-                        transformOrigin: 'center',
+                        left: `calc(50% + ${x}px)`,
+                        top: `calc(50% + ${y}px)`,
                       }}
                     >
                       {segment.name}

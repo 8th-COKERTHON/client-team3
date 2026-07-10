@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import CTAButton from '../../components/CTAButton'
 import AuthInput from '../../components/AuthInput'
-import Header from '../../components/Header'
-import { login } from '../../api/auth'
+import Header from '../../components/common/Header'
+import { login, saveAuthUser } from '../../api/auth'
 import { clearSavedGroupId, saveGroupId } from '../../api/group'
 import { ApiError } from '../../types/api'
 
@@ -79,6 +79,7 @@ function LoginPage() {
       setErrorMessage('')
 
       const response = await login(form)
+      saveAuthUser(response.data)
       const [groupId] = response.data.groupIds
 
       if (groupId) {

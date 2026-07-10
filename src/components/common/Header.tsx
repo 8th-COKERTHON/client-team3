@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Bell } from "lucide-react";
+import { Bell, ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getUnreadNotificationCount } from "../../api/notification";
 
@@ -7,14 +7,21 @@ const UNREAD_POLL_INTERVAL_MS = 30_000;
 
 interface HeaderProps {
   title?: string;
+  profileInitial?: string;
+  onBack?: () => void;
+  showActions?: boolean;
 }
 
-function Header({ title }: HeaderProps) {
+function Header({ title, profileInitial = "?", onBack, showActions = false }: HeaderProps) {
   const navigate = useNavigate();
   const [hasUnread, setHasUnread] = useState(false);
 
   // 벨 빨간 점 표시 여부를 주기적으로 폴링
   useEffect(() => {
+    if (!showActions) {
+      return;
+    }
+
     let cancelled = false;
 
     async function fetchUnreadCount() {
@@ -35,17 +42,27 @@ function Header({ title }: HeaderProps) {
       cancelled = true;
       window.clearInterval(intervalId);
     };
-  }, []);
-
+  }, [showActions]);
   return (
-    // 상단 헤더 (로고/타이틀 · 알림 · 프로필)
     <header
-      className="flex w-full items-center justify-between px-5 pb-3"
+      className="relative flex w-full items-center justify-between bg-white px-5 pb-3"
       style={{ paddingTop: "calc(var(--safe-top) + 12px)" }}
     >
-      {/* 로고 또는 페이지 타이틀 */}
+      {onBack ? (
+        <button
+          type="button"
+          onClick={onBack}
+          className="absolute left-5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center text-gray-900 outline-none focus:outline-none"
+          style={{ marginTop: "calc(var(--safe-top) / 2)" }}
+        >
+          <ChevronLeft size={20} />
+        </button>
+      ) : null}
+
       {title ? (
-        <span className="text-title-01 leading-tight font-bold text-gray-900">{title}</span>
+        <span className={`text-title-01 leading-tight font-bold text-gray-900 ${onBack ? "mx-auto" : ""}`}>
+          {title}
+        </span>
       ) : (
         <div className="flex items-baseline gap-0.5">
           <span className="text-title-02 leading-none font-bold text-gray-900">한땀</span>
@@ -53,23 +70,26 @@ function Header({ title }: HeaderProps) {
         </div>
       )}
 
-      {/* 알림 · 프로필 아바타 */}
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={() => navigate("/notifications")}
-          className="relative flex h-9 w-9 items-center justify-center rounded-full bg-[#F5F5FA]"
-        >
-          <Bell size={16} strokeWidth={2} className="text-gray-900" />
-          {hasUnread && (
-            <span className="absolute right-2 top-[7px] h-2 w-2 rounded-full bg-brand" />
-          )}
-        </button>
+      {showActions ? (
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => navigate("/notifications")}
+            className="relative flex h-9 w-9 items-center justify-center rounded-full bg-[#F5F5FA]"
+          >
+            <Bell size={16} strokeWidth={2} className="text-gray-900" />
+            {hasUnread && (
+              <span className="absolute right-2 top-[7px] h-2 w-2 rounded-full bg-brand" />
+            )}
+          </button>
 
-        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand text-body-01 leading-none font-bold text-white">
-          김
-        </span>
-      </div>
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand text-body-01 leading-none font-bold text-white">
+            {profileInitial}
+          </span>
+        </div>
+      ) : (
+        <div className="w-8 shrink-0" />
+      )}
     </header>
   );
 }

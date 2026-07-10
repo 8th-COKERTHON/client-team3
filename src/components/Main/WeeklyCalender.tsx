@@ -4,7 +4,6 @@ import { fetchCalendarChores } from "../../api/calendar";
 import type { ApiChore, CalendarDayChores } from "../../types/calendar";
 import {
   CATEGORY_BG_CLASS,
-  CATEGORY_LABEL,
   CATEGORY_TEXT_CLASS,
   CATEGORY_TINT_CLASS,
   getTodayIsoDate,
@@ -49,30 +48,27 @@ interface DayTag {
   tintClass: string;
 }
 
-// 특정 날짜의 과업 카테고리 태그 목록(중복 제거, 최대 MAX_TAGS_PER_DAY개)을 계산
+// 특정 날짜의 과업 태그 목록(최대 MAX_TAGS_PER_DAY개)을 계산
 function getTagsByDate(calendarData: CalendarDayChores[], date: string): DayTag[] {
   const dayChores = calendarData.find((day) => day.date === date)?.chores ?? [];
   const tags: DayTag[] = [];
-  const seenKeys = new Set<string>();
 
   for (const chore of dayChores) {
-    const resolved = resolveChoreCategory(chore.category);
-    const key = resolved ?? chore.category;
-    if (seenKeys.has(key)) continue;
-    seenKeys.add(key);
+    const resolved = resolveChoreCategory(chore.category, chore.name);
+    const key = String(chore.id);
 
     tags.push(
       resolved
         ? {
             key,
-            label: CATEGORY_LABEL[resolved],
+            label: chore.name,
             bgClass: CATEGORY_BG_CLASS[resolved],
             textClass: CATEGORY_TEXT_CLASS[resolved],
             tintClass: CATEGORY_TINT_CLASS[resolved],
           }
         : {
             key,
-            label: chore.category,
+            label: chore.name,
             bgClass: "bg-gray-400",
             textClass: "text-gray-400",
             tintClass: "bg-gray-100",
@@ -126,18 +122,16 @@ function WeeklyCalendar({ groupId, onSelectDate }: WeeklyCalendarProps) {
   const goToNextWeek = () => setAnchorDate((prev) => shiftDate(prev, DAYS_PER_WEEK));
 
   return (
-    // 주간 달력 섹션
     <section className="w-full">
-      {/* 연/월 라벨 · 주 이동 버튼 */}
-      <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-title-02 leading-tight font-bold text-gray-900">{monthLabel}</h2>
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-headline leading-tight font-extrabold text-gray-900">{monthLabel}</h2>
 
-        <div className="flex items-center">
+        <div className="flex items-center gap-1">
           <button
             type="button"
             onClick={goToPreviousWeek}
             aria-label="일주일 전"
-            className="flex h-8 w-8 items-center justify-center text-gray-300"
+            className="flex h-7 w-7 items-center justify-center rounded-full text-gray-300"
           >
             <ChevronLeft size={16} strokeWidth={2} />
           </button>
@@ -145,20 +139,18 @@ function WeeklyCalendar({ groupId, onSelectDate }: WeeklyCalendarProps) {
             type="button"
             onClick={goToNextWeek}
             aria-label="일주일 후"
-            className="flex h-8 w-8 items-center justify-center text-gray-300"
+            className="flex h-7 w-7 items-center justify-center rounded-full text-gray-300"
           >
             <ChevronRight size={16} strokeWidth={2} />
           </button>
         </div>
       </div>
 
-      {/* 조회 실패 안내 */}
       {error && (
         <p className="mb-2 text-caption leading-none font-medium text-gray-300">{error}</p>
       )}
 
-      {/* 요일 · 날짜 · 카테고리 태그 목록 */}
-      <div className="grid grid-cols-7 gap-1 rounded-lg bg-white p-3">
+      <div className="grid grid-cols-7 gap-1 overflow-visible rounded-[28px] bg-[#FCFCFE] px-3 py-3">
         {weekDates.map((date, idx) => {
           const day = Number(date.slice(-2));
           const isToday = date === todayIso;
@@ -172,7 +164,7 @@ function WeeklyCalendar({ groupId, onSelectDate }: WeeklyCalendarProps) {
               key={date}
               type="button"
               onClick={() => onSelectDate(date, dayChores)}
-              className="flex flex-col items-center gap-2"
+              className="flex min-h-[92px] flex-col items-center gap-2 overflow-visible rounded-2xl px-0.5 py-1"
             >
               <span
                 className={`text-caption leading-none font-medium ${
@@ -183,21 +175,23 @@ function WeeklyCalendar({ groupId, onSelectDate }: WeeklyCalendarProps) {
               </span>
 
               <span
-                className={`text-body-01 leading-none ${isToday ? "font-bold opacity-100" : "font-semibold opacity-[0.65]"} ${
+                className={`text-title-02 leading-none ${isToday ? "font-bold opacity-100" : "font-semibold opacity-[0.7]"} ${
                   isSunday ? "text-brand" : "text-gray-900"
                 }`}
               >
                 {day}
               </span>
 
-              <div className="flex flex-col items-stretch gap-1">
+              <div className="mt-1 flex w-full flex-col items-center gap-1 overflow-visible">
                 {tags.map((tag) => (
                   <span
                     key={tag.key}
-                    className={`flex items-center gap-1 rounded-md px-1.5 py-1 ${tag.tintClass}`}
+                    className={`flex w-max items-center justify-start gap-1 rounded-full px-1.5 py-1 whitespace-nowrap ${tag.tintClass}`}
                   >
                     <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${tag.bgClass}`} />
-                    <span className={`text-caption leading-none font-medium ${tag.textClass}`}>
+                    <span
+                      className={`max-w-[52px] truncate text-[9px] leading-none font-medium ${tag.textClass}`}
+                    >
                       {tag.label}
                     </span>
                   </span>

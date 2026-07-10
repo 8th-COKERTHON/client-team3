@@ -4,6 +4,7 @@ import Layout from './Layout'
 import CTAButton from '../CTAButton'
 import Dropdown from '../Dropdown'
 import { getChoreBoard, updateChoreStatus } from '../../api/chore'
+import { sendChoreRequest } from '../../api/notification'
 import {
   CHORE_OPTION_TO_STATUS,
   CHORE_STATUS_TO_OPTION,
@@ -19,21 +20,21 @@ interface MemberOption {
 
 interface TaskDetailBottomSheetProps {
   groupId: number
-  choreId: number
+  groupChoreId: number
   members?: MemberOption[]
   onStatusUpdated?: (updatedChore: ChoreBoardItem) => void
   onClose?: () => void
 }
 
-function findChoreById(board: ChoreBoardResponse, choreId: number) {
+function findChoreById(board: ChoreBoardResponse, groupChoreId: number) {
   return [...board.scheduled, ...board.inProgress, ...board.done].find(
-    (item) => item.choreId === choreId,
+    (item) => item.id === groupChoreId,
   )
 }
 
 export default function TaskDetailBottomSheet({
   groupId,
-  choreId,
+  groupChoreId,
   members = [],
   onStatusUpdated,
   onClose,
@@ -44,6 +45,7 @@ export default function TaskDetailBottomSheet({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [selectedMember, setSelectedMember] = useState('')
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchChore() {
@@ -51,7 +53,7 @@ export default function TaskDetailBottomSheet({
         setIsLoading(true)
 
         const response = await getChoreBoard(groupId)
-        const targetChore = findChoreById(response.data, choreId)
+        const targetChore = findChoreById(response.data, groupChoreId)
 
         if (!targetChore) {
           return
@@ -65,7 +67,7 @@ export default function TaskDetailBottomSheet({
     }
 
     void fetchChore()
-  }, [groupId, choreId])
+  }, [groupId, groupChoreId])
 
   const selectedMemberId = useMemo(() => {
     return members.find((member) => member.label === chore?.assigneeName)?.id ?? members[0]?.id ?? ''
@@ -76,23 +78,35 @@ export default function TaskDetailBottomSheet({
   }, [selectedMemberId])
 
   const handleRequest = async () => {
-    if (!chore) {
+    if (!chore || !selectedMember) {
       return
     }
 
     try {
       setIsSubmitting(true)
+      setErrorMessage(null)
+      if (selectedStatus === 'done') {
+        const response = await updateChoreStatus(
+          groupId,
+          chore.id,
+          CHORE_OPTION_TO_STATUS[selectedStatus],
+          Number(selectedMember),
+        )
 
-      const response = await updateChoreStatus(
-        groupId,
-        chore.choreId,
-        CHORE_OPTION_TO_STATUS[selectedStatus],
-      )
+        setChore(response.data)
+        setSelectedStatus(CHORE_STATUS_TO_OPTION[response.data.status])
+        onStatusUpdated?.(response.data)
+      } else {
+        await sendChoreRequest({
+          receiverId: Number(selectedMember),
+          choreId: chore.id,
+          choreName: chore.name,
+        })
 
-      setChore(response.data)
-      setSelectedStatus(CHORE_STATUS_TO_OPTION[response.data.status])
-      setIsRequested(true)
-      onStatusUpdated?.(response.data)
+        setIsRequested(true)
+      }
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : '수행 요청을 보내지 못했어요.')
     } finally {
       setIsSubmitting(false)
     }
@@ -110,10 +124,9 @@ export default function TaskDetailBottomSheet({
 
   return (
     <Layout onClose={onClose}>
-      <div className='flex flex-col items-start gap-1'>
-        {/* 제목 */}
-        <div className='flex w-full items-center justify-between'>
-          <div className='flex flex-col w-full items-start gap-[1px]'>
+      <div className='flex w-full flex-col items-start gap-1'>
+        <div className='flex w-full items-start justify-between gap-3'>
+          <div className='flex min-w-0 flex-1 flex-col items-start gap-[1px] pr-1'>
             <p className='text-subtitle font-extrabold text-black leading-[1.5]'>
               {chore.name}
             </p>
@@ -129,39 +142,49 @@ export default function TaskDetailBottomSheet({
             />
           )}
         </div>
-        {/* 본문 */}
         <div className='flex flex-col w-full mt-6'>
           <p className='text-body-02 font-bold text-gray leading-[1.5]'>
             상태 선택
           </p>
-          <div className='flex w-full items-center justify-between py-1'>
+          <div className='mt-2 grid w-full grid-cols-3 gap-2'>
             <StatButton
               status="pending"
               selected={selectedStatus === 'pending'}
               onClick={() => setSelectedStatus('pending')}
+              className="w-full min-w-0"
             />
             <StatButton
               status="inProgress"
               selected={selectedStatus === 'inProgress'}
               onClick={() => setSelectedStatus('inProgress')}
+              className="w-full min-w-0"
             />
             <StatButton
               status="done"
               selected={selectedStatus === 'done'}
               onClick={() => setSelectedStatus('done')}
+              className="w-full min-w-0"
             />
           </div>
 
         </div>
 
-        {/* 버튼 */}
-        <div className='flex flex-col w-full items-center py-[10px] gap-1'>
-          <CTAButton onClick={handleRequest} disabled={isSubmitting}>
+        <div className='flex flex-col w-full items-center gap-1 py-[10px]'>
+          <CTAButton
+            onClick={handleRequest}
+            disabled={isSubmitting || (selectedStatus !== 'done' && isRequested) || !selectedMember}
+            className="w-full"
+          >
             수행 요청하기
           </CTAButton>
           {isRequested && (
             <p className="mt-2 text-body-02 leading-[1.5] font-medium text-brand">
               요청을 보냈어요!
+            </p>
+          )}
+          {errorMessage && (
+            <p className="mt-2 text-body-02 leading-[1.5] font-medium text-brand">
+              {errorMessage}
             </p>
           )}
 

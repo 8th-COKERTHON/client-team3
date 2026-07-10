@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import CTAButton from '../../components/CTAButton'
 import AuthInput from '../../components/AuthInput'
-import Header from '../../components/Header'
+import Header from '../../components/common/Header'
 import { signUp } from '../../api/auth'
 import { ApiError } from '../../types/api'
 
