@@ -7,6 +7,8 @@ import SignUpPage from "./pages/auth/SignUpPage";
 import RoomCreatePage from "./pages/room/RoomCreatePage";
 import RoomEntryPage from "./pages/room/RoomEntryPage";
 import RoomJoinPage from "./pages/room/RoomJoinPage";
+import ChoreCatalogBottomSheet from "./components/chore/ChoreCatalogBottomSheet";
+import ChoreAddPage from "./pages/ChoreAddPage";
 
 function App() {
   return (
@@ -20,6 +22,9 @@ function App() {
       <Route path="/room/create" element={<RoomCreatePage />} />
       <Route path="/room/join" element={<RoomJoinPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
+
+      <Route path="/chore-catalog" element={<ChoreCatalogBottomSheet />} />
+      <Route path="/add-chore" element={<ChoreAddPage />} />
     </Routes>
   );
 }
