@@ -21,7 +21,7 @@ function getFirstWeekday(year: number, month: number) {
 export function CalendarPicker({
   value,
   onChange,
-  highlightedDates = [],
+  //highlightedDates = [],
 }: Props) {
   const initial = value ? new Date(value) : new Date();
   const [year, setYear] = useState(initial.getFullYear());
