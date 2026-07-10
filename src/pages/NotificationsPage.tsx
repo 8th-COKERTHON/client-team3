@@ -7,7 +7,9 @@ import { formatRelativeTime } from "../utils/formatRelativeTime";
 
 function NotificationsPage() {
   const navigate = useNavigate();
-  const [notifications, setNotifications] = useState<ChoreRequestNotification[]>([]);
+  const [notifications, setNotifications] = useState<
+    ChoreRequestNotification[]
+  >([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -25,7 +27,9 @@ function NotificationsPage() {
         }
       } catch (error) {
         if (cancelled) return;
-        setErrorMessage(error instanceof Error ? error.message : "알림을 불러오지 못했어요.");
+        setErrorMessage(
+          error instanceof Error ? error.message : "알림을 불러오지 못했어요.",
+        );
       } finally {
         if (!cancelled) {
           setIsLoading(false);
@@ -55,10 +59,10 @@ function NotificationsPage() {
           >
             <ChevronLeft size={16} strokeWidth={2} className="text-gray-900" />
           </button>
-          <h1 className="text-title-01 leading-tight font-bold text-gray-900">알림</h1>
+          <h1 className="text-title-01 leading-tight font-bold text-gray-900">
+            알림
+          </h1>
         </div>
-
-        <span className="text-body-02 leading-none font-medium text-gray-08">전체읽기</span>
       </header>
 
       {/* 알림 목록 */}

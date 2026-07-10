@@ -7,3 +7,10 @@ export function getChoreRequestNotifications() {
     method: "GET",
   });
 }
+
+// GET /api/chore-requests/unread-count - 읽지 않은 알림 수 조회 (벨 빨간 점 표시 여부, 주기적으로 폴링)
+export function getUnreadNotificationCount() {
+  return request<number>("/api/chore-requests/unread-count", {
+    method: "GET",
+  });
+}
