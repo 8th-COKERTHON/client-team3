@@ -1,5 +1,9 @@
+import { useEffect, useState } from "react";
 import { Bell } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { getUnreadNotificationCount } from "../../api/notification";
+
+const UNREAD_POLL_INTERVAL_MS = 30_000;
 
 interface HeaderProps {
   title?: string;
@@ -8,6 +12,31 @@ interface HeaderProps {
 
 function Header({ title, profileInitial = "?" }: HeaderProps) {
   const navigate = useNavigate();
+  const [hasUnread, setHasUnread] = useState(false);
+
+  // 벨 빨간 점 표시 여부를 주기적으로 폴링
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchUnreadCount() {
+      try {
+        const response = await getUnreadNotificationCount();
+        if (!cancelled) {
+          setHasUnread(response.data > 0);
+        }
+      } catch {
+        // 폴링 실패는 조용히 무시 (다음 주기에 재시도)
+      }
+    }
+
+    void fetchUnreadCount();
+    const intervalId = window.setInterval(fetchUnreadCount, UNREAD_POLL_INTERVAL_MS);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(intervalId);
+    };
+  }, []);
   return (
     // 상단 헤더 (로고/타이틀 · 알림 · 프로필)
     <header
@@ -29,9 +58,12 @@ function Header({ title, profileInitial = "?" }: HeaderProps) {
         <button
           type="button"
           onClick={() => navigate("/notifications")}
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-[#F5F5FA]"
+          className="relative flex h-9 w-9 items-center justify-center rounded-full bg-[#F5F5FA]"
         >
           <Bell size={16} strokeWidth={2} className="text-gray-900" />
+          {hasUnread && (
+            <span className="absolute right-2 top-[7px] h-2 w-2 rounded-full bg-brand" />
+          )}
         </button>
 
         <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand text-body-01 leading-none font-bold text-white">
