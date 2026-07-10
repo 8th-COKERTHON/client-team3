@@ -1,11 +1,10 @@
 import { Circle, CheckCircle2 } from "lucide-react";
-import type { Chore } from "../../mockData";
-import { MEMBER_BG_CLASS, MEMBER_TEXT_CLASS } from "../../mockData";
+import { MEMBER_BG_CLASS, MEMBER_TEXT_CLASS, type MainChore } from "../../types/main";
 
 interface ChoreItemProps {
-  chore: Chore;
-  onToggle?: (id: string) => void;
-  onOpenDetail?: (chore: Chore) => void;
+  chore: MainChore;
+  onToggle?: (id: number, done: boolean) => void;
+  onOpenDetail?: (chore: MainChore) => void;
 }
 
 const DIFFICULTY_MAX = 5;
@@ -74,7 +73,7 @@ function ChoreItem({ chore, onToggle, onOpenDetail }: ChoreItemProps) {
         type="button"
         onClick={(event) => {
           event.stopPropagation();
-          onToggle?.(chore.id);
+          onToggle?.(chore.choreId, chore.done);
         }}
         aria-pressed={chore.done}
         className="flex h-6 w-6 shrink-0 items-center justify-center text-gray-900"

@@ -1,10 +1,10 @@
-import type { Chore } from "../../mockData";
+import type { MainChore } from "../../types/main";
 import ChoreItem from "./ChoreItem";
 
 interface ChoreListProps {
-  chores: Chore[];
-  onToggle?: (id: string) => void;
-  onOpenDetail?: (chore: Chore) => void;
+  chores: MainChore[];
+  onToggle?: (id: number, done: boolean) => void;
+  onOpenDetail?: (chore: MainChore) => void;
 }
 
 function ChoreList({ chores, onToggle, onOpenDetail }: ChoreListProps) {

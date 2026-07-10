@@ -1,12 +1,12 @@
 import BottomSheet from "../common/BottomSheet";
 import ChoreItem from "./ChoreItem";
-import type { Chore } from "../../mockData";
+import type { MainChore } from "../../types/main";
 
 interface DateChoreSheetProps {
   date: string | null;
-  chores: Chore[];
+  chores: MainChore[];
   onClose: () => void;
-  onToggle: (id: string) => void;
+  onToggle: (id: number, done: boolean) => void;
 }
 
 function formatDateTitle(isoDate: string): string {

@@ -9,7 +9,7 @@ import {
 export default function BottomNav() {
   return (
     <nav className="flex h-[70px] w-full bg-white border-t border-t-[rgba(34,34,34,0.07)]">
-      <NavLink to="/" end className="flex flex-1 flex-col items-center justify-center gap-[2px]">
+      <NavLink to="/main" end className="flex flex-1 flex-col items-center justify-center gap-[2px]">
         {({ isActive }) => (
           <>
             {isActive ? (
