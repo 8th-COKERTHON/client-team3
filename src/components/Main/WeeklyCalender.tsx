@@ -103,7 +103,7 @@ function WeeklyCalendar({ onSelectDate }: WeeklyCalendarProps) {
               </span>
 
               <span
-                className={`text-body-01 leading-none ${isToday ? "font-bold" : "font-semibold"} ${
+                className={`text-body-01 leading-none ${isToday ? "font-bold opacity-100" : "font-semibold opacity-[0.65]"} ${
                   isSunday ? "text-brand" : "text-gray-900"
                 }`}
               >
