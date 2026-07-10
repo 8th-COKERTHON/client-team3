@@ -1,11 +1,17 @@
 import { useState } from 'react'
 import StatButton from '../StatButton'
 import Layout from './Layout'
+import CTAButton from '../CTAButton'
 
 type Status = 'pending' | 'inProgress' | 'done'
 
 export default function TaskDetailBottomSheet() {
   const [selectedStatus, setSelectedStatus] = useState<Status>('pending')
+  const [isRequested, setIsRequested] = useState(false)
+
+  const handleRequest = () => {
+    setIsRequested(true)
+  }
 
   return (
     <Layout>
@@ -21,11 +27,11 @@ export default function TaskDetailBottomSheet() {
         </div>
 
         {/* 본문 */}
-        <div className='flex flex-col mt-6'>
+        <div className='flex flex-col w-full mt-6'>
           <p className='text-body-02 font-bold text-gray leading-[1.5]'>
             상태 선택
           </p>
-          <div className='flex gap-2 py-1'>
+          <div className='flex w-full items-center justify-between py-1'>
             <StatButton
               status="pending"
               selected={selectedStatus === 'pending'}
@@ -46,7 +52,15 @@ export default function TaskDetailBottomSheet() {
         </div>
 
         {/* 버튼 */}
-        <div>
+        <div className='flex flex-col w-full items-center py-[10px] gap-1'>
+          <CTAButton onClick={handleRequest}>
+            수행 요청하기
+          </CTAButton>
+          {isRequested && (
+            <p className="mt-2 text-body-02 leading-[1.5] font-medium text-brand">
+              요청을 보냈어요!
+            </p>
+          )}
 
         </div>
       </div>
