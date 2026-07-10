@@ -1,4 +1,6 @@
 export type ChoreStatus = "SCHEDULED" | "IN_PROGRESS" | "DONE";
+export type AssignType = "NONE" | "MANUAL" | "ROULETTE";
+export type RepeatCycle = "NONE" | "DAILY" | "WEEKLY" | "BIWEEKLY" | "MONTHLY" | "YEARLY";
 
 export type ChoreStatusOption = "pending" | "inProgress" | "done";
 
@@ -28,6 +30,7 @@ export interface ChoreBoardResponse {
 
 export interface UpdateChoreStatusRequest {
   status: ChoreStatus;
+  performerId?: number;
 }
 
 export type UpdateChoreStatusResponse = ChoreBoardItem;
@@ -54,3 +57,26 @@ export interface CatalogChore {
 }
 
 export type ChoreCatalogResponse = CatalogChore[];
+
+export interface GroupChoreCreateRequest {
+  name: string;
+  difficulty: number;
+  date: string;
+  assignType: AssignType;
+  assigneeId?: number;
+  repeatCycle: RepeatCycle;
+  repeatPattern?: string;
+  memo?: string;
+}
+
+export interface GroupChoreFromCatalogRequest {
+  name?: string;
+  date: string;
+  assignType: AssignType;
+  assigneeId?: number;
+  repeatCycle: RepeatCycle;
+  repeatPattern?: string;
+  memo?: string;
+}
+
+export type GroupChoreResponse = ChoreBoardItem;

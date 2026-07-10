@@ -26,7 +26,7 @@ export default function ChoreCatalogBottomSheet({ onClose }: Props) {
 
   const handleConfirm = () => {
     if (!selected) return;
-    navigate("/chores/add", {
+    navigate("/add-chore", {
       state: {
         choreId: selected.id,
         name: selected.name,
@@ -43,7 +43,7 @@ export default function ChoreCatalogBottomSheet({ onClose }: Props) {
       <button
         type="button"
         className="text-left px-4 py-3 rounded-xl bg-gray-100 mb-4 text-sm text-gray-500"
-        onClick={() => navigate("/chores/add")}
+        onClick={() => navigate("/add-chore")}
       >
         + 새 과업 추가하기
       </button>

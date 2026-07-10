@@ -6,3 +6,9 @@ export interface ChoreRequestNotification {
   status: string;
   createdAt: string;
 }
+
+export interface ChoreRequestCreateRequest {
+  receiverId: number;
+  choreId: number;
+  choreName: string;
+}

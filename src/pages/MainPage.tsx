@@ -8,6 +8,7 @@ import WeeklyCalendar from "../components/Main/WeeklyCalender";
 import EmergencyAlert from "../components/Main/EmergencyAlert";
 import ChoreList from "../components/Main/ChoreList";
 import DateChoreSheet from "../components/Main/DateChoreSheet";
+import ChoreCatalogBottomSheet from "../components/chore/ChoreCatalogBottomSheet";
 import InviteCodeBottomSheet from "../components/bottomsheet/InviteCodeBottomSheet";
 import TaskDetailBottomSheet from "../components/bottomsheet/TaskDetailBottomSheet";
 import { getSavedUserNickname } from "../api/auth";
@@ -45,6 +46,7 @@ function MainPage() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedDateChores, setSelectedDateChores] = useState<MainChore[]>([]);
   const [selectedChoreId, setSelectedChoreId] = useState<number | null>(null);
+  const [isChoreCatalogOpen, setIsChoreCatalogOpen] = useState(false);
   const [isInviteSheetOpen, setIsInviteSheetOpen] = useState(false);
   const [inviteCode, setInviteCode] = useState("");
   const [isInviteCodeLoading, setIsInviteCodeLoading] = useState(false);
@@ -234,10 +236,15 @@ function MainPage() {
       <button
         type="button"
         aria-label="과업 추가"
+        onClick={() => setIsChoreCatalogOpen(true)}
         className="fixed bottom-[calc(var(--bottom-nav-height)+var(--safe-bottom)+20px)] right-[max(20px,calc((100vw-min(100vw,var(--app-max-width)))/2+20px))] z-20 flex h-[62px] w-[62px] items-center justify-center rounded-[20px] bg-brand text-white shadow-[0_18px_30px_rgba(253,95,84,0.32)]"
       >
         <Plus size={28} strokeWidth={2.5} />
       </button>
+
+      {isChoreCatalogOpen && (
+        <ChoreCatalogBottomSheet onClose={() => setIsChoreCatalogOpen(false)} />
+      )}
 
       <DateChoreSheet
         date={selectedDate}

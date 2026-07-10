@@ -4,6 +4,7 @@ import Layout from './Layout'
 import CTAButton from '../CTAButton'
 import Dropdown from '../Dropdown'
 import { getChoreBoard, updateChoreStatus } from '../../api/chore'
+import { sendChoreRequest } from '../../api/notification'
 import {
   CHORE_OPTION_TO_STATUS,
   CHORE_STATUS_TO_OPTION,
@@ -44,6 +45,7 @@ export default function TaskDetailBottomSheet({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [selectedMember, setSelectedMember] = useState('')
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchChore() {
@@ -76,23 +78,35 @@ export default function TaskDetailBottomSheet({
   }, [selectedMemberId])
 
   const handleRequest = async () => {
-    if (!chore) {
+    if (!chore || !selectedMember) {
       return
     }
 
     try {
       setIsSubmitting(true)
+      setErrorMessage(null)
+      if (selectedStatus === 'done') {
+        const response = await updateChoreStatus(
+          groupId,
+          chore.id,
+          CHORE_OPTION_TO_STATUS[selectedStatus],
+          Number(selectedMember),
+        )
 
-      const response = await updateChoreStatus(
-        groupId,
-        chore.id,
-        CHORE_OPTION_TO_STATUS[selectedStatus],
-      )
+        setChore(response.data)
+        setSelectedStatus(CHORE_STATUS_TO_OPTION[response.data.status])
+        onStatusUpdated?.(response.data)
+      } else {
+        await sendChoreRequest({
+          receiverId: Number(selectedMember),
+          choreId: chore.id,
+          choreName: chore.name,
+        })
 
-      setChore(response.data)
-      setSelectedStatus(CHORE_STATUS_TO_OPTION[response.data.status])
-      setIsRequested(true)
-      onStatusUpdated?.(response.data)
+        setIsRequested(true)
+      }
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : '수행 요청을 보내지 못했어요.')
     } finally {
       setIsSubmitting(false)
     }
@@ -156,12 +170,21 @@ export default function TaskDetailBottomSheet({
         </div>
 
         <div className='flex flex-col w-full items-center gap-1 py-[10px]'>
-          <CTAButton onClick={handleRequest} disabled={isSubmitting || isRequested} className="w-full">
+          <CTAButton
+            onClick={handleRequest}
+            disabled={isSubmitting || (selectedStatus !== 'done' && isRequested) || !selectedMember}
+            className="w-full"
+          >
             수행 요청하기
           </CTAButton>
           {isRequested && (
             <p className="mt-2 text-body-02 leading-[1.5] font-medium text-brand">
               요청을 보냈어요!
+            </p>
+          )}
+          {errorMessage && (
+            <p className="mt-2 text-body-02 leading-[1.5] font-medium text-brand">
+              {errorMessage}
             </p>
           )}
 
