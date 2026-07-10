@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { chores, CATEGORY_BG_CLASS, CATEGORY_TEXT_CLASS, CATEGORY_TINT_CLASS, CATEGORY_LABEL, TODAY_ISO } from "../../mockData";
-import type { ChoreCategory } from "../../mockData";
+import { CATEGORY_BG_CLASS, CATEGORY_TEXT_CLASS, CATEGORY_TINT_CLASS, CATEGORY_LABEL, TODAY_ISO } from "../../mockData";
+import { fetchCalendarChores, resolveChoreCategory, TEMP_GROUP_ID } from "../../api/calendar";
+import type { CalendarDayChores } from "../../api/calendar";
 
 const WEEKDAY_LABELS = ["월", "화", "수", "목", "금", "토", "일"];
 const MAX_TAGS_PER_DAY = 2;
@@ -28,15 +29,53 @@ function shiftDate(isoDate: string, days: number): string {
   return d.toISOString().slice(0, 10);
 }
 
-// 특정 날짜에 존재하는 과업 카테고리 목록(중복 제거)을 계산
-function getCategoriesByDate(date: string): ChoreCategory[] {
-  const categories = chores.filter((chore) => chore.date === date).map((chore) => chore.category);
-  return Array.from(new Set(categories));
-}
-
 function formatMonthLabel(isoDate: string): string {
   const d = new Date(isoDate);
   return `${d.getFullYear()}년 ${d.getMonth() + 1}월`;
+}
+
+interface DayTag {
+  key: string;
+  label: string;
+  bgClass: string;
+  textClass: string;
+  tintClass: string;
+}
+
+// 특정 날짜의 과업 카테고리 태그 목록(중복 제거, 최대 MAX_TAGS_PER_DAY개)을 계산
+function getTagsByDate(calendarData: CalendarDayChores[], date: string): DayTag[] {
+  const dayChores = calendarData.find((day) => day.date === date)?.chores ?? [];
+  const tags: DayTag[] = [];
+  const seenKeys = new Set<string>();
+
+  for (const chore of dayChores) {
+    const resolved = resolveChoreCategory(chore.category);
+    const key = resolved ?? chore.category;
+    if (seenKeys.has(key)) continue;
+    seenKeys.add(key);
+
+    tags.push(
+      resolved
+        ? {
+            key,
+            label: CATEGORY_LABEL[resolved],
+            bgClass: CATEGORY_BG_CLASS[resolved],
+            textClass: CATEGORY_TEXT_CLASS[resolved],
+            tintClass: CATEGORY_TINT_CLASS[resolved],
+          }
+        : {
+            key,
+            label: chore.category,
+            bgClass: "bg-gray-400",
+            textClass: "text-gray-400",
+            tintClass: "bg-gray-100",
+          },
+    );
+
+    if (tags.length >= MAX_TAGS_PER_DAY) break;
+  }
+
+  return tags;
 }
 
 interface WeeklyCalendarProps {
@@ -45,8 +84,34 @@ interface WeeklyCalendarProps {
 
 function WeeklyCalendar({ onSelectDate }: WeeklyCalendarProps) {
   const [anchorDate, setAnchorDate] = useState(TODAY_ISO);
+  const [calendarData, setCalendarData] = useState<CalendarDayChores[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
   const weekDates = getWeekDates(anchorDate);
   const monthLabel = formatMonthLabel(weekDates[0]);
+  const startDate = weekDates[0];
+  const endDate = weekDates[DAYS_PER_WEEK - 1];
+
+  // 표시 중인 주(startDate~endDate)가 바뀔 때마다 캘린더 과업을 서버에서 조회
+  useEffect(() => {
+    let cancelled = false;
+
+    fetchCalendarChores(TEMP_GROUP_ID, startDate, endDate)
+      .then((data) => {
+        if (cancelled) return;
+        setCalendarData(data);
+        setError(null);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setCalendarData([]);
+        setError(err instanceof Error ? err.message : "캘린더 과업을 불러오지 못했어요.");
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [startDate, endDate]);
 
   const goToPreviousWeek = () => setAnchorDate((prev) => shiftDate(prev, -DAYS_PER_WEEK));
   const goToNextWeek = () => setAnchorDate((prev) => shiftDate(prev, DAYS_PER_WEEK));
@@ -78,6 +143,11 @@ function WeeklyCalendar({ onSelectDate }: WeeklyCalendarProps) {
         </div>
       </div>
 
+      {/* 조회 실패 안내 */}
+      {error && (
+        <p className="mb-2 text-caption leading-none font-medium text-gray-300">{error}</p>
+      )}
+
       {/* 요일 · 날짜 · 카테고리 태그 목록 */}
       <div className="grid grid-cols-7 gap-1 rounded-lg bg-white p-3">
         {weekDates.map((date, idx) => {
@@ -85,7 +155,7 @@ function WeeklyCalendar({ onSelectDate }: WeeklyCalendarProps) {
           const isToday = date === TODAY_ISO;
           const isSunday = idx === 6;
           const isSaturday = idx === 5;
-          const categories = getCategoriesByDate(date).slice(0, MAX_TAGS_PER_DAY);
+          const tags = getTagsByDate(calendarData, date);
 
           return (
             <button
@@ -111,14 +181,14 @@ function WeeklyCalendar({ onSelectDate }: WeeklyCalendarProps) {
               </span>
 
               <div className="flex flex-col items-stretch gap-1">
-                {categories.map((category) => (
+                {tags.map((tag) => (
                   <span
-                    key={category}
-                    className={`flex items-center gap-1 rounded-md px-1.5 py-1 ${CATEGORY_TINT_CLASS[category]}`}
+                    key={tag.key}
+                    className={`flex items-center gap-1 rounded-md px-1.5 py-1 ${tag.tintClass}`}
                   >
-                    <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${CATEGORY_BG_CLASS[category]}`} />
-                    <span className={`text-caption leading-none font-medium ${CATEGORY_TEXT_CLASS[category]}`}>
-                      {CATEGORY_LABEL[category]}
+                    <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${tag.bgClass}`} />
+                    <span className={`text-caption leading-none font-medium ${tag.textClass}`}>
+                      {tag.label}
                     </span>
                   </span>
                 ))}
