@@ -1,8 +1,8 @@
+@import "pretendard/dist/web/variable/pretendardvariable.css";
 @import "tailwindcss";
 
 @theme {
-  
-    /* font-size */
+  /* font-size */
   --text-headline: 24px;
   --text-title-01: 20px;
   --text-title-02: 18px;
@@ -19,7 +19,6 @@
   --font-weight-bold: 700;
 
   --color-white: #ffffff;
-
 }
 
 @layer base {
@@ -43,19 +42,29 @@
     --header-height: 44px; /* 상단 헤더의 기본 높이 */
     --bottom-nav-height: 72px; /* 하단 네비게이션 바의 기본 높이 */
 
-    --safe-top: env(safe-area-inset-top); /* 아이폰 노치 등 상단 안전 영역 여백 */
-    --safe-bottom: env(safe-area-inset-bottom); /* 아이폰 홈 인디케이터 등 하단 안전 영역 여백 */
+    --safe-top: env(
+      safe-area-inset-top
+    ); /* 아이폰 노치 등 상단 안전 영역 여백 */
+    --safe-bottom: env(
+      safe-area-inset-bottom
+    ); /* 아이폰 홈 인디케이터 등 하단 안전 영역 여백 */
   }
 
   * {
     box-sizing: border-box;
   }
-  
+
   body {
     margin: 0;
     min-width: 320px;
     min-height: var(--app-min-height);
-    font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    font-family:
+      "Pretendard Variable",
+      Pretendard,
+      -apple-system,
+      BlinkMacSystemFont,
+      system-ui,
+      sans-serif;
     font-weight: var(--font-weight-regular);
     font-size: var(--text-body-01);
   }
