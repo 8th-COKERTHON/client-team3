@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 
 interface BottomSheetLayoutProps {
   children: ReactNode
+  onClose?: () => void
 }
 
 function BottomHandle() {
@@ -12,20 +13,28 @@ function BottomIndicator() {
   return <div className="h-[5px] w-[134px] rounded-full bg-black" />
 }
 
-export default function Layout({ children }: BottomSheetLayoutProps) {
+export default function Layout({ children, onClose }: BottomSheetLayoutProps) {
   return (
-    <section className="flex w-full flex-col rounded-t-[32px] bg-white border border-red-500">
-      <div className="flex w-full items-center justify-center pt-4 pb-6">
-        <BottomHandle />
-      </div>
+    <div
+      className="fixed inset-0 z-50 flex items-end bg-black/60"
+      onClick={onClose}
+    >
+      <section
+        className="flex w-full flex-col rounded-t-[32px] bg-white"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="flex w-full items-center justify-center pt-4 pb-6">
+          <BottomHandle />
+        </div>
 
-      <div className="w-full p-5">
-        {children}
-      </div>
+        <div className="w-full p-5">
+          {children}
+        </div>
 
-      <div className="flex items-center justify-center pt-5 pb-2">
-        <BottomIndicator />
-      </div>
-    </section>
+        <div className="flex items-center justify-center pt-5 pb-2">
+          <BottomIndicator />
+        </div>
+      </section>
+    </div>
   )
 }
