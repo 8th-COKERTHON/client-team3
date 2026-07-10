@@ -17,8 +17,24 @@
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
 
+  --color-brand: #fd5f54;
   --color-white: #ffffff;
+
+  --color-gray-01: #ffffff;
+  --color-gray-02: #f4f4f4;
+  --color-gray-03: #eaeaea;
+  --color-gray-04: #e0e0e0;
+  --color-gray-05: #d5d5d5;
+  --color-gray-06: #c0c0c0;
+  --color-gray-07: #ababab;
+  --color-gray-08: #969696;
+  --color-gray-09: #5b5b5b;
+  --color-gray-10: #3d3d3d;
+  --color-gray-11: #2e2e2e;
+  --color-gray-12: #202020;
+  --color-gray-12: #111111;
 
   /* Figma "Color Styles" - Brand(RED) / BLUE, 나머지 카테고리 색상은 확장 */
   --color-brand: #fd5f54;

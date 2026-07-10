@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Header from "../components/common/Header";
+import BottomNav from "../components/BottomNav";
 import FamilyFilter, { type FilterId } from "../components/Main/FamilyFilter";
 import WeeklyCalendar from "../components/Main/WeeklyCalender";
 import EmergencyAlert from "../components/Main/EmergencyAlert";
@@ -28,7 +29,7 @@ function MainPage() {
 
   return (
     // 메인 홈 화면 페이지
-    <main className="min-h-screen w-full max-w-md mx-auto bg-gray-50">
+    <main className="relative min-h-screen w-full max-w-md mx-auto bg-gray-50 pb-[calc(var(--bottom-nav-height)+var(--safe-bottom))]">
       {/* 상단 헤더 */}
       <Header title="홈" />
 
@@ -55,6 +56,11 @@ function MainPage() {
         onClose={() => setSelectedDate(null)}
         onToggle={handleToggle}
       />
+
+      {/* 하단 네비게이션 */}
+      <div className="fixed inset-x-0 bottom-0 z-10 mx-auto w-full max-w-md">
+        <BottomNav />
+      </div>
     </main>
   );
 }

@@ -19,10 +19,12 @@ function ChoreList({ chores, onToggle }: ChoreListProps) {
         </h2>
       </div>
 
-      {/* 과업 리스트 카드 */}
-      <div className="divide-y divide-gray-100 rounded-2xl bg-white px-4">
+      {/* 과업 리스트 카드 - 최대 3개 높이로 고정, 스와이프(스크롤)로 나머지 확인 */}
+      <div className="max-h-[220px] snap-y snap-mandatory divide-y divide-gray-100 overflow-y-auto rounded-2xl bg-white px-4">
         {chores.map((chore) => (
-          <ChoreItem key={chore.id} chore={chore} onToggle={onToggle} />
+          <div key={chore.id} className="snap-start">
+            <ChoreItem chore={chore} onToggle={onToggle} />
+          </div>
         ))}
       </div>
     </section>
