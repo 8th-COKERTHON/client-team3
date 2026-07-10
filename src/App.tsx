@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import MainPage from "./pages/MainPage";
 import StartPage from "./pages/StartPage";
+import NotificationsPage from "./pages/NotificationsPage";
 import LoginPage from "./pages/auth/LoginPage";
 import SignUpPage from "./pages/auth/SignUpPage";
 import RoomCreatePage from "./pages/room/RoomCreatePage";
@@ -12,6 +13,7 @@ function App() {
     <Routes>
       <Route path="/" element={<StartPage />} />
       <Route path="/main" element={<MainPage />} />
+      <Route path="/notifications" element={<NotificationsPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignUpPage />} />
       <Route path="/room-entry" element={<RoomEntryPage />} />
