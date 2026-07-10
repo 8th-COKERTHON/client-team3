@@ -4,9 +4,10 @@ import ChoreItem from "./ChoreItem";
 interface ChoreListProps {
   chores: Chore[];
   onToggle?: (id: string) => void;
+  onOpenDetail?: (chore: Chore) => void;
 }
 
-function ChoreList({ chores, onToggle }: ChoreListProps) {
+function ChoreList({ chores, onToggle, onOpenDetail }: ChoreListProps) {
   const doneCount = chores.filter((chore) => chore.done).length;
 
   return (
@@ -23,7 +24,7 @@ function ChoreList({ chores, onToggle }: ChoreListProps) {
       <div className="max-h-[220px] snap-y snap-mandatory divide-y divide-gray-100 overflow-y-auto rounded-2xl bg-white px-4">
         {chores.map((chore) => (
           <div key={chore.id} className="snap-start">
-            <ChoreItem chore={chore} onToggle={onToggle} />
+            <ChoreItem chore={chore} onToggle={onToggle} onOpenDetail={onOpenDetail} />
           </div>
         ))}
       </div>

@@ -5,6 +5,7 @@ import { MEMBER_BG_CLASS, MEMBER_TEXT_CLASS } from "../../mockData";
 interface ChoreItemProps {
   chore: Chore;
   onToggle?: (id: string) => void;
+  onOpenDetail?: (chore: Chore) => void;
 }
 
 const DIFFICULTY_MAX = 5;
@@ -29,13 +30,18 @@ function DifficultyBar({
   );
 }
 
-function ChoreItem({ chore, onToggle }: ChoreItemProps) {
+function ChoreItem({ chore, onToggle, onOpenDetail }: ChoreItemProps) {
   const bgClass = MEMBER_BG_CLASS[chore.color];
   const textClass = MEMBER_TEXT_CLASS[chore.color];
 
   return (
-    // 과업 리스트 로우
-    <div className="flex items-center gap-3 py-3.5">
+    // 과업 리스트 로우 (카드 클릭 시 상세 상태 모달)
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={() => onOpenDetail?.(chore)}
+      className="flex items-center gap-3 py-3.5"
+    >
       {/* 담당자 색상 바 */}
       <span className={`h-10 w-[3px] shrink-0 rounded-full ${bgClass}`} />
 
@@ -66,7 +72,10 @@ function ChoreItem({ chore, onToggle }: ChoreItemProps) {
       {/* 완료 체크 버튼 */}
       <button
         type="button"
-        onClick={() => onToggle?.(chore.id)}
+        onClick={(event) => {
+          event.stopPropagation();
+          onToggle?.(chore.id);
+        }}
         aria-pressed={chore.done}
         className="flex h-6 w-6 shrink-0 items-center justify-center text-gray-900"
       >

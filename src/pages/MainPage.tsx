@@ -6,12 +6,20 @@ import WeeklyCalendar from "../components/Main/WeeklyCalender";
 import EmergencyAlert from "../components/Main/EmergencyAlert";
 import ChoreList from "../components/Main/ChoreList";
 import DateChoreSheet from "../components/Main/DateChoreSheet";
-import { chores as initialChores, TODAY_ISO } from "../mockData";
+import TaskDetailBottomSheet from "../components/bottomsheet/TaskDetailBottomSheet";
+import { TEMP_GROUP_ID } from "../api/calendar";
+import { chores as initialChores, familyMembers, TODAY_ISO, type Chore } from "../mockData";
+
+// mock Chore.id(예: "t3")에서 숫자만 뽑아 TaskDetailBottomSheet가 요구하는 choreId로 변환
+function toNumericChoreId(id: string): number {
+  return Number(id.replace(/\D/g, "")) || 0;
+}
 
 function MainPage() {
   const [chores, setChores] = useState(initialChores);
   const [activeFilterId, setActiveFilterId] = useState<FilterId>("all");
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [selectedChoreId, setSelectedChoreId] = useState<string | null>(null);
 
   const todayChores = chores.filter((chore) => chore.date === TODAY_ISO);
   const visibleChores =
@@ -20,11 +28,16 @@ function MainPage() {
       : todayChores.filter((chore) => chore.assigneeId === activeFilterId);
   const urgentChore = todayChores.find((chore) => !chore.done);
   const selectedDateChores = chores.filter((chore) => chore.date === selectedDate);
+  const selectedChore: Chore | null = chores.find((chore) => chore.id === selectedChoreId) ?? null;
 
   const handleToggle = (id: string) => {
     setChores((prev) =>
       prev.map((chore) => (chore.id === id ? { ...chore, done: !chore.done } : chore))
     );
+  };
+
+  const handleComplete = (id: string) => {
+    setChores((prev) => prev.map((chore) => (chore.id === id ? { ...chore, done: true } : chore)));
   };
 
   return (
@@ -46,7 +59,11 @@ function MainPage() {
         )}
 
         {/* 오늘의 과업 섹션 */}
-        <ChoreList chores={visibleChores} onToggle={handleToggle} />
+        <ChoreList
+          chores={visibleChores}
+          onToggle={handleToggle}
+          onOpenDetail={(chore) => setSelectedChoreId(chore.id)}
+        />
       </div>
 
       {/* 날짜별 과업 바텀시트 */}
@@ -56,6 +73,21 @@ function MainPage() {
         onClose={() => setSelectedDate(null)}
         onToggle={handleToggle}
       />
+
+      {/* 과업 상태 변경 모달 (팀 공용 TaskDetailBottomSheet, 실제 API 연동) */}
+      {selectedChore && (
+        <TaskDetailBottomSheet
+          groupId={TEMP_GROUP_ID}
+          choreId={toNumericChoreId(selectedChore.id)}
+          members={familyMembers.map((member) => ({ id: member.id, label: member.fullName }))}
+          onStatusUpdated={(updatedChore) => {
+            if (updatedChore.status === "DONE") {
+              handleComplete(selectedChore.id);
+            }
+          }}
+          onClose={() => setSelectedChoreId(null)}
+        />
+      )}
 
       {/* 하단 네비게이션 */}
       <div className="fixed inset-x-0 bottom-0 z-10 mx-auto w-full max-w-md">
