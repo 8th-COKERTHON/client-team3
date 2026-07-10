@@ -1,4 +1,5 @@
 import { Bell } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface HeaderProps {
   title?: string;
@@ -6,6 +7,7 @@ interface HeaderProps {
 }
 
 function Header({ title, profileInitial = "?" }: HeaderProps) {
+  const navigate = useNavigate();
   return (
     // 상단 헤더 (로고/타이틀 · 알림 · 프로필)
     <header
@@ -26,6 +28,7 @@ function Header({ title, profileInitial = "?" }: HeaderProps) {
       <div className="flex items-center gap-2">
         <button
           type="button"
+          onClick={() => navigate("/notifications")}
           className="flex h-9 w-9 items-center justify-center rounded-full bg-[#F5F5FA]"
         >
           <Bell size={16} strokeWidth={2} className="text-gray-900" />
