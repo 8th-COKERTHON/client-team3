@@ -8,6 +8,7 @@ export interface SignUpRequest {
   name: string
   loginId: string
   password: string
+  passwordCheck: string
 }
 
 export interface LoginRequest {
