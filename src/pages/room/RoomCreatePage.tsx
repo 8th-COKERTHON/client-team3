@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import CTAButton from '../../components/CTAButton'
-import Header from '../../components/Header'
+import Header from '../../components/common/Header'
 import { createGroup, saveGroupId } from '../../api/group'
 import { ApiError } from '../../types/api'
 

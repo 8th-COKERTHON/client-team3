@@ -1,4 +1,5 @@
-import BottomSheet from "../common/BottomSheet";
+import { useEffect, useState } from "react";
+import Layout from "./Layout";
 
 interface InviteCodeBottomSheetProps {
   open: boolean;
@@ -15,8 +16,49 @@ function InviteCodeBottomSheet({
   errorMessage = null,
   onClose,
 }: InviteCodeBottomSheetProps) {
+  if (!open) {
+    return null;
+  }
+
+  const [copyMessage, setCopyMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!copyMessage) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => setCopyMessage(null), 1600);
+    return () => window.clearTimeout(timeoutId);
+  }, [copyMessage]);
+
+  const handleCopyInviteCode = async () => {
+    if (!inviteCode || isLoading || errorMessage) {
+      return;
+    }
+
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(inviteCode);
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = inviteCode;
+        textArea.style.position = "fixed";
+        textArea.style.opacity = "0";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+      }
+
+      setCopyMessage("초대 코드를 복사했어요.");
+    } catch {
+      setCopyMessage("복사에 실패했어요.");
+    }
+  };
+
   return (
-    <BottomSheet open={open} onClose={onClose}>
+    <Layout onClose={onClose}>
       <div className="px-5 pb-8">
         <div className="mb-8">
           <h2 className="text-title-01 font-extrabold leading-tight text-gray-900">친구 초대</h2>
@@ -32,7 +74,12 @@ function InviteCodeBottomSheet({
           <p className="relative text-center text-body-02 font-bold leading-none text-[#A8A4C2]">
             초대 코드
           </p>
-          <div className="relative mt-6 text-center">
+          <button
+            type="button"
+            onClick={handleCopyInviteCode}
+            disabled={!inviteCode || isLoading || Boolean(errorMessage)}
+            className="relative mt-6 flex w-full flex-col items-center rounded-2xl outline-none focus:outline-none disabled:cursor-default"
+          >
             {isLoading ? (
               <p className="text-title-01 font-bold text-gray-400">불러오는 중...</p>
             ) : errorMessage ? (
@@ -42,7 +89,12 @@ function InviteCodeBottomSheet({
                 {inviteCode || "-----"}
               </p>
             )}
-          </div>
+            {copyMessage && (
+              <p className="mt-3 text-body-02 font-medium leading-none text-gray-400">
+                {copyMessage}
+              </p>
+            )}
+          </button>
         </div>
 
         <div className="mt-6 flex items-start gap-3 rounded-[24px] border border-brand/20 bg-white px-5 py-5 shadow-[0_10px_24px_rgba(253,95,84,0.08)]">
@@ -56,7 +108,7 @@ function InviteCodeBottomSheet({
           </p>
         </div>
       </div>
-    </BottomSheet>
+    </Layout>
   );
 }
 

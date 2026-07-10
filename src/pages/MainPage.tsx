@@ -193,7 +193,7 @@ function MainPage() {
   if (isLoading && groupId) {
     return (
       <main className="relative min-h-screen w-full max-w-md mx-auto bg-white">
-        <Header title="홈" profileInitial={profileInitial} />
+        <Header title="홈" profileInitial={profileInitial} showActions />
         <div className="flex min-h-[60vh] items-center justify-center px-5">
           <p className="text-body-02 font-medium text-gray-400">메인 정보를 불러오는 중...</p>
         </div>
@@ -203,7 +203,7 @@ function MainPage() {
 
   return (
     <main className="relative min-h-screen w-full max-w-md mx-auto bg-white pb-[calc(var(--bottom-nav-height)+var(--safe-bottom))]">
-      <Header title="홈" profileInitial={profileInitial} />
+      <Header title="홈" profileInitial={profileInitial} showActions />
 
       <div className="flex flex-col gap-5 px-5 pb-4 pt-0">
         <section className="-mx-5 rounded-b-[32px] bg-white px-5 pb-8 pt-2 shadow-[0_18px_45px_rgba(20,20,43,0.08)]">
