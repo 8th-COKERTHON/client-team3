@@ -2,13 +2,17 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react';
 
 interface CTAButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
+  textClassName?: string;
 }
 
 export default function CTAButton({
   children,
   className = '',
+  textClassName = '',
   ...props
 }: CTAButtonProps) {
+  const resolvedTextClassName = textClassName || 'text-white'
+
   return (
     <button
       type="button"
@@ -20,7 +24,9 @@ export default function CTAButton({
       `}
       {...props}
     >
-      <span className="whitespace-nowrap text-body-01 font-body-01 font-extrabold text-white leading-none">
+      <span
+        className={`whitespace-nowrap text-body-01 font-body-01 font-extrabold leading-none ${resolvedTextClassName}`}
+      >
         {children}
       </span>
     </button>

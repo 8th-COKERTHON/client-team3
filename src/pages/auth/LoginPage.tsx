@@ -83,7 +83,7 @@ function LoginPage() {
 
       if (groupId) {
         saveGroupId(groupId)
-        navigate('/')
+        navigate('/main')
       } else {
         clearSavedGroupId()
         navigate('/room-entry')

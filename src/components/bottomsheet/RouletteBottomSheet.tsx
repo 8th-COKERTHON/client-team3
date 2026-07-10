@@ -2,15 +2,18 @@ import { useEffect, useMemo, useState } from 'react'
 import CTAButton from '../CTAButton'
 import Layout from './Layout'
 import { getGroupMembers } from '../../api/group'
-import { getRouletteSlices } from '../../api/roulette'
+import { getRouletteResults, getRouletteSlices } from '../../api/roulette'
 import type { RouletteMember, RouletteSliceResponse } from '../../types/roulette'
 
-const ROULETTE_COLORS = ['#31D17C', '#FF6157', '#4B84E5', '#F5A623', '#9B6DFF', '#00C2C7']
+const ROULETTE_COLORS = ['#34C77B', '#FF6157', '#4F80C8', '#F5A623', '#9B6DFF', '#00C2C7']
 
 interface RouletteBottomSheetProps {
   groupId: number
+  nextWeekStartDate?: string
+  groupChoreId?: number
   onClose?: () => void
   onSave?: (winner: RouletteMember) => void
+  onSpin?: () => Promise<number | null> | number | null
 }
 
 interface RouletteSegment extends RouletteMember {
@@ -58,8 +61,11 @@ function formatGradient(segments: RouletteSegment[]) {
 
 export default function RouletteBottomSheet({
   groupId,
+  nextWeekStartDate,
+  groupChoreId,
   onClose,
   onSave,
+  onSpin,
 }: RouletteBottomSheetProps) {
   const [rouletteMembers, setRouletteMembers] = useState<RouletteMember[]>([])
   const [winner, setWinner] = useState<RouletteMember | null>(null)
@@ -117,18 +123,45 @@ export default function RouletteBottomSheet({
     [isSpinning, rotation, rouletteSegments],
   )
 
-  const handleSpin = () => {
+  const handleSpin = async () => {
     if (rouletteMembers.length === 0 || isSpinning) {
       return
     }
 
-    const winnerIndex = getWeightedWinnerIndex(rouletteMembers)
+    setIsSpinning(true)
+    setWinner(null)
+
+    let winnerIndex = -1
+
+    if (onSpin) {
+      const winnerId = await onSpin()
+      winnerIndex = rouletteMembers.findIndex((member) => member.memberId === winnerId)
+    }
+
+    if (winnerIndex < 0 && nextWeekStartDate) {
+      try {
+        const response = await getRouletteResults(groupId, nextWeekStartDate)
+        const targetResult =
+          response.data.find((result) => result.groupChoreId === groupChoreId) ??
+          response.data.at(-1) ??
+          null
+
+        if (targetResult) {
+          winnerIndex = rouletteMembers.findIndex((member) => member.memberId === targetResult.winnerId)
+        }
+      } catch {
+        setErrorMessage('룰렛 결과를 불러오지 못했습니다.')
+      }
+    }
+
+    if (winnerIndex < 0) {
+      winnerIndex = getWeightedWinnerIndex(rouletteMembers)
+    }
+
     const nextWinner = rouletteMembers[winnerIndex]
     const targetSegment = rouletteSegments[winnerIndex]
     const spinRotation = 360 * 5 - targetSegment.centerAngle
 
-    setIsSpinning(true)
-    setWinner(null)
     setRotation((prevRotation) => prevRotation + spinRotation)
 
     window.setTimeout(() => {
@@ -151,8 +184,8 @@ export default function RouletteBottomSheet({
       <div className="flex flex-col items-center">
         <div className="flex w-full flex-col items-start">
           <h2 className="text-subtitle font-extrabold leading-[1.5] text-black">룰렛 돌리기</h2>
-          <p className="text-caption font-medium leading-[1.5] text-[#999999]">
-            이렇게 기여도에 따라 당첨 확률이 달라져요
+          <p className="text-body-02 font-medium leading-[1.5] text-gray-08">
+            이달의 기여도에 따라 당첨 확률이 달라져요
           </p>
         </div>
 
