@@ -1,11 +1,14 @@
 import { request } from './client'
 import type {
+  AuthUser,
   LoginRequest,
   LoginResponse,
   LogoutResponse,
   SignUpRequest,
   SignUpResponse,
 } from '../types/auth'
+
+const USER_NICKNAME_STORAGE_KEY = 'userNickname'
 
 // 회원가입
 export function signUp(payload: SignUpRequest) {
@@ -28,4 +31,16 @@ export function logout() {
   return request<LogoutResponse>('/api/auth/logout', {
     method: 'POST',
   })
+}
+
+export function saveAuthUser(user: AuthUser) {
+  window.localStorage.setItem(USER_NICKNAME_STORAGE_KEY, user.nickname)
+}
+
+export function getSavedUserNickname() {
+  return window.localStorage.getItem(USER_NICKNAME_STORAGE_KEY)
+}
+
+export function clearSavedAuthUser() {
+  window.localStorage.removeItem(USER_NICKNAME_STORAGE_KEY)
 }

@@ -39,7 +39,7 @@ function ChoreItem({ chore, onToggle, onOpenDetail }: ChoreItemProps) {
       role="button"
       tabIndex={0}
       onClick={() => onOpenDetail?.(chore)}
-      className="flex items-center gap-3 py-3.5"
+      className="flex items-center gap-3 py-4"
     >
       {/* 담당자 색상 바 */}
       <span className={`h-10 w-[3px] shrink-0 rounded-full ${bgClass}`} />
@@ -47,7 +47,7 @@ function ChoreItem({ chore, onToggle, onOpenDetail }: ChoreItemProps) {
       {/* 과업명 · 담당자 · 난이도 · 점수 */}
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
         <span
-          className={`text-subtitle leading-snug font-semibold ${
+          className={`text-title-02 leading-snug font-bold ${
             chore.done ? "text-gray-400 line-through" : "text-gray-900"
           }`}
         >
@@ -76,12 +76,12 @@ function ChoreItem({ chore, onToggle, onOpenDetail }: ChoreItemProps) {
           onToggle?.(chore.choreId, chore.done);
         }}
         aria-pressed={chore.done}
-        className="flex h-6 w-6 shrink-0 items-center justify-center text-gray-900"
+        className="flex h-7 w-7 shrink-0 items-center justify-center text-gray-900"
       >
         {chore.done ? (
-          <CheckCircle2 size={22} strokeWidth={1.5} />
+          <CheckCircle2 size={24} strokeWidth={1.5} />
         ) : (
-          <Circle size={22} strokeWidth={1.5} />
+          <Circle size={24} strokeWidth={1.5} className="text-gray-300" />
         )}
       </button>
     </div>

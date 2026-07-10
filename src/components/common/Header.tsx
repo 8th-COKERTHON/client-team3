@@ -2,13 +2,14 @@ import { Bell } from "lucide-react";
 
 interface HeaderProps {
   title?: string;
+  profileInitial?: string;
 }
 
-function Header({ title }: HeaderProps) {
+function Header({ title, profileInitial = "?" }: HeaderProps) {
   return (
     // 상단 헤더 (로고/타이틀 · 알림 · 프로필)
     <header
-      className="flex w-full items-center justify-between px-5 pb-3"
+      className="flex w-full items-center justify-between bg-white px-5 pb-3"
       style={{ paddingTop: "calc(var(--safe-top) + 12px)" }}
     >
       {/* 로고 또는 페이지 타이틀 */}
@@ -31,7 +32,7 @@ function Header({ title }: HeaderProps) {
         </button>
 
         <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand text-body-01 leading-none font-bold text-white">
-          김
+          {profileInitial}
         </span>
       </div>
     </header>

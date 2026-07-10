@@ -11,22 +11,32 @@ function ChoreList({ chores, onToggle, onOpenDetail }: ChoreListProps) {
   const doneCount = chores.filter((chore) => chore.done).length;
 
   return (
-    // 오늘의 과업 섹션
     <section className="w-full">
-      {/* 완료 현황 타이틀 */}
-      <div className="mb-3">
-        <h2 className="text-title-02 leading-tight font-bold text-gray-900">
-          오늘의 과업 ({doneCount} / {chores.length} 완료)
-        </h2>
-      </div>
+      <div className="overflow-hidden rounded-[28px] bg-white shadow-[0_14px_36px_rgba(31,31,31,0.06)]">
+        <div className="flex items-center justify-between px-5 pb-4 pt-5">
+          <h2 className="text-title-02 leading-tight font-extrabold text-gray-900">
+            오늘의 과업
+          </h2>
+          <span className="rounded-full bg-[#F4F4F8] px-3 py-1 text-body-02 font-bold leading-none text-gray-400">
+            {doneCount} / {chores.length} 완료
+          </span>
+        </div>
 
-      {/* 과업 리스트 카드 - 최대 3개 높이로 고정, 스와이프(스크롤)로 나머지 확인 */}
-      <div className="max-h-[220px] snap-y snap-mandatory divide-y divide-gray-100 overflow-y-auto rounded-2xl bg-white px-4">
-        {chores.map((chore) => (
-          <div key={chore.id} className="snap-start">
-            <ChoreItem chore={chore} onToggle={onToggle} onOpenDetail={onOpenDetail} />
+        {chores.length > 0 ? (
+          <div className="max-h-[320px] snap-y snap-mandatory divide-y divide-gray-100 overflow-y-auto px-4">
+            {chores.map((chore) => (
+              <div key={chore.id} className="snap-start">
+                <ChoreItem chore={chore} onToggle={onToggle} onOpenDetail={onOpenDetail} />
+              </div>
+            ))}
           </div>
-        ))}
+        ) : (
+          <div className="flex min-h-[180px] items-center justify-center px-5 pb-8">
+            <p className="text-body-01 font-medium leading-[1.6] text-gray-400">
+              오늘 등록된 과업이 없어요.
+            </p>
+          </div>
+        )}
       </div>
     </section>
   );

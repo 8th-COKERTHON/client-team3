@@ -2,6 +2,7 @@ interface StatButtonProps {
   status: 'pending' | 'inProgress' | 'done'
   selected?: boolean
   onClick?: () => void
+  className?: string
 }
 
 const STATUS_CONFIG = {
@@ -28,6 +29,7 @@ export default function StatButton({
   status,
   selected = false,
   onClick,
+  className = '',
 }: StatButtonProps ) {
   const { label, selectedClassName } = STATUS_CONFIG[status];
 
@@ -35,7 +37,7 @@ export default function StatButton({
     <button
       type="button"
       onClick={onClick}
-      className={`${baseClassName} ${selected ? selectedClassName : unselectedClassName}`}
+      className={`${baseClassName} ${selected ? selectedClassName : unselectedClassName} ${className}`}
     >
       {label}
     </button>

@@ -5,28 +5,22 @@ interface EmergencyAlertProps {
   memberName: string;
 }
 
-// 단어 마지막 글자의 받침 유무로 목적격 조사(을/를)를 판별
-function getObjectParticle(word: string): "을" | "를" {
-  const lastCharCode = word.charCodeAt(word.length - 1);
-  const hasBatchim = (lastCharCode - 0xac00) % 28 !== 0;
-  return hasBatchim ? "을" : "를";
-}
-
 function EmergencyAlert({ choreName, memberName }: EmergencyAlertProps) {
   return (
-    // 긴급 출동 경고 섹션
     <section className="w-full">
-      <div className="flex items-center gap-3">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand/10">
-          <AlertTriangle className="text-brand" size={16} strokeWidth={2} />
+      <div className="flex items-center gap-3 rounded-[28px] border border-brand/15 bg-white px-5 py-4 shadow-[0_10px_30px_rgba(253,95,84,0.08)]">
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand">
+          <AlertTriangle className="text-white" size={18} strokeWidth={2.25} />
         </span>
 
-        <p className="text-body-01 leading-relaxed font-bold text-gray-900">
-          <span className="text-brand">{choreName}</span>
-          {getObjectParticle(choreName)} 빨리 해결해주세요!
-          <br />
-          {memberName} 사원의 긴급 출동을 요청합니다 🚨
-        </p>
+        <div className="min-w-0 flex-1">
+          <p className="text-body-01 leading-[1.5] font-extrabold text-gray-900">
+            {choreName}을 빨리 해결해주세요!
+          </p>
+          <p className="mt-1 text-body-02 leading-[1.5] font-medium text-brand">
+            {memberName} 사원의 긴급 출동을 요청합니다 🚨
+          </p>
+        </div>
       </div>
     </section>
   );

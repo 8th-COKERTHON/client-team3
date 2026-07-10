@@ -31,3 +31,16 @@ export interface GroupInviteCodeResponse {
   groupId: number
   inviteCode: string
 }
+
+export interface GroupChoreReportRanking {
+  rank: number
+  memberId: number
+  memberName: string
+  score: number
+  percentage: number
+}
+
+export interface GroupChoreReportResponse {
+  targetWeek: string
+  rankings: GroupChoreReportRanking[]
+}

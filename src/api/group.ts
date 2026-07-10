@@ -1,4 +1,5 @@
 import type {
+  GroupChoreReportResponse,
   GroupCreateRequest,
   GroupCreateResponse,
   GroupInviteCodeResponse,
@@ -34,6 +35,15 @@ export function getGroupInviteCode(groupId: number) {
   return request<GroupInviteCodeResponse>(`/api/groups/${groupId}/invite-code`, {
     method: 'GET',
   })
+}
+
+export function getGroupChoreReport(groupId: number, targetWeek: string) {
+  return request<GroupChoreReportResponse>(
+    `/api/groups/${groupId}/chore-report?targetWeek=${targetWeek}`,
+    {
+      method: 'GET',
+    },
+  )
 }
 
 export function saveGroupId(groupId: number) {

@@ -110,10 +110,9 @@ export default function TaskDetailBottomSheet({
 
   return (
     <Layout onClose={onClose}>
-      <div className='flex flex-col items-start gap-1'>
-        {/* 제목 */}
-        <div className='flex w-full items-center justify-between'>
-          <div className='flex flex-col w-full items-start gap-[1px]'>
+      <div className='flex w-full flex-col items-start gap-1'>
+        <div className='flex w-full items-start justify-between gap-3'>
+          <div className='flex min-w-0 flex-1 flex-col items-start gap-[1px] pr-1'>
             <p className='text-subtitle font-extrabold text-black leading-[1.5]'>
               {chore.name}
             </p>
@@ -129,34 +128,35 @@ export default function TaskDetailBottomSheet({
             />
           )}
         </div>
-        {/* 본문 */}
         <div className='flex flex-col w-full mt-6'>
           <p className='text-body-02 font-bold text-gray leading-[1.5]'>
             상태 선택
           </p>
-          <div className='flex w-full items-center justify-between py-1'>
+          <div className='mt-2 grid w-full grid-cols-3 gap-2'>
             <StatButton
               status="pending"
               selected={selectedStatus === 'pending'}
               onClick={() => setSelectedStatus('pending')}
+              className="w-full min-w-0"
             />
             <StatButton
               status="inProgress"
               selected={selectedStatus === 'inProgress'}
               onClick={() => setSelectedStatus('inProgress')}
+              className="w-full min-w-0"
             />
             <StatButton
               status="done"
               selected={selectedStatus === 'done'}
               onClick={() => setSelectedStatus('done')}
+              className="w-full min-w-0"
             />
           </div>
 
         </div>
 
-        {/* 버튼 */}
-        <div className='flex flex-col w-full items-center py-[10px] gap-1'>
-          <CTAButton onClick={handleRequest} disabled={isSubmitting}>
+        <div className='flex flex-col w-full items-center gap-1 py-[10px]'>
+          <CTAButton onClick={handleRequest} disabled={isSubmitting} className="w-full">
             수행 요청하기
           </CTAButton>
           {isRequested && (

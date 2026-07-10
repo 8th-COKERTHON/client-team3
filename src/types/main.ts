@@ -107,11 +107,12 @@ export function resolveChoreCategory(rawCategory: string, choreName?: string): C
   return entry ? entry[0] : null;
 }
 
-export function buildFamilyMembers(members: GroupMember[]): FamilyMember[] {
+export function buildFamilyMembers(members: GroupMember[], currentUserName?: string | null): FamilyMember[] {
   return members.map((member, index) => ({
     id: member.memberId,
     fullName: member.name,
     color: MEMBER_COLORS[index % MEMBER_COLORS.length],
+    isMe: currentUserName ? member.name === currentUserName : false,
   }));
 }
 
