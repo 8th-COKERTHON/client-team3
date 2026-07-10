@@ -1,15 +1,21 @@
 import { Plus } from "lucide-react";
-import { familyMembers, MEMBER_BORDER_CLASS, MEMBER_TINT_CLASS, MEMBER_TEXT_CLASS } from "../../mockData";
+import {
+  MEMBER_BORDER_CLASS,
+  MEMBER_TEXT_CLASS,
+  MEMBER_TINT_CLASS,
+  type FamilyMember,
+} from "../../types/main";
 
 // 필터 칩 하나의 식별자 ("all" 또는 family member id)
 export type FilterId = "all" | string;
 
 interface FamilyFilterProps {
+  members: FamilyMember[];
   activeId: FilterId;
   onSelect: (id: FilterId) => void;
 }
 
-function FamilyFilter({ activeId, onSelect }: FamilyFilterProps) {
+function FamilyFilter({ members, activeId, onSelect }: FamilyFilterProps) {
   return (
     // 가족 구성원 필터 섹션
     <section className="w-full">
@@ -17,7 +23,7 @@ function FamilyFilter({ activeId, onSelect }: FamilyFilterProps) {
       <div className="mb-3 flex items-center gap-1.5">
         <h2 className="text-subtitle leading-tight font-bold text-gray-900">우리 방</h2>
         <span className="rounded-full bg-[#F0F0F6] px-2 py-0.5 text-caption leading-none font-medium text-gray-400">
-          {familyMembers.length}명
+          {members.length}명
         </span>
       </div>
 
@@ -49,8 +55,9 @@ function FamilyFilter({ activeId, onSelect }: FamilyFilterProps) {
         <span className="mt-5 h-11 w-px shrink-0 bg-gray-100" />
 
         {/* 가족 구성원 칩 목록 */}
-        {familyMembers.map((member) => {
-          const isActive = activeId === member.id;
+        {members.map((member) => {
+          const memberId = String(member.id);
+          const isActive = activeId === memberId;
           const ringClass = MEMBER_BORDER_CLASS[member.color];
           const activeBgClass = MEMBER_TINT_CLASS[member.color];
           const activeTextClass = MEMBER_TEXT_CLASS[member.color];
@@ -59,7 +66,7 @@ function FamilyFilter({ activeId, onSelect }: FamilyFilterProps) {
             <button
               key={member.id}
               type="button"
-              onClick={() => onSelect(member.id)}
+              onClick={() => onSelect(memberId)}
               className="flex w-14 shrink-0 flex-col items-center gap-1.5"
             >
               {/* 아바타 + "나" 배지 래퍼 */}

@@ -27,7 +27,7 @@ export default function RoomJoinPage() {
       })
 
       saveGroupId(response.data.groupId)
-      navigate('/')
+      navigate('/main')
     } catch (error) {
       if (error instanceof ApiError) {
         setErrorMessage(error.message)

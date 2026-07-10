@@ -1,8 +1,15 @@
 import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { CATEGORY_BG_CLASS, CATEGORY_TEXT_CLASS, CATEGORY_TINT_CLASS, CATEGORY_LABEL, TODAY_ISO } from "../../mockData";
-import { fetchCalendarChores, resolveChoreCategory, TEMP_GROUP_ID } from "../../api/calendar";
-import type { CalendarDayChores } from "../../api/calendar";
+import { fetchCalendarChores } from "../../api/calendar";
+import type { ApiChore, CalendarDayChores } from "../../types/calendar";
+import {
+  CATEGORY_BG_CLASS,
+  CATEGORY_LABEL,
+  CATEGORY_TEXT_CLASS,
+  CATEGORY_TINT_CLASS,
+  getTodayIsoDate,
+  resolveChoreCategory,
+} from "../../types/main";
 
 const WEEKDAY_LABELS = ["월", "화", "수", "목", "금", "토", "일"];
 const MAX_TAGS_PER_DAY = 2;
@@ -79,11 +86,13 @@ function getTagsByDate(calendarData: CalendarDayChores[], date: string): DayTag[
 }
 
 interface WeeklyCalendarProps {
-  onSelectDate: (date: string) => void;
+  groupId: number;
+  onSelectDate: (date: string, chores: ApiChore[]) => void;
 }
 
-function WeeklyCalendar({ onSelectDate }: WeeklyCalendarProps) {
-  const [anchorDate, setAnchorDate] = useState(TODAY_ISO);
+function WeeklyCalendar({ groupId, onSelectDate }: WeeklyCalendarProps) {
+  const todayIso = getTodayIsoDate();
+  const [anchorDate, setAnchorDate] = useState(todayIso);
   const [calendarData, setCalendarData] = useState<CalendarDayChores[]>([]);
   const [error, setError] = useState<string | null>(null);
 
@@ -96,7 +105,7 @@ function WeeklyCalendar({ onSelectDate }: WeeklyCalendarProps) {
   useEffect(() => {
     let cancelled = false;
 
-    fetchCalendarChores(TEMP_GROUP_ID, startDate, endDate)
+    fetchCalendarChores(groupId, startDate, endDate)
       .then((data) => {
         if (cancelled) return;
         setCalendarData(data);
@@ -111,7 +120,7 @@ function WeeklyCalendar({ onSelectDate }: WeeklyCalendarProps) {
     return () => {
       cancelled = true;
     };
-  }, [startDate, endDate]);
+  }, [groupId, startDate, endDate]);
 
   const goToPreviousWeek = () => setAnchorDate((prev) => shiftDate(prev, -DAYS_PER_WEEK));
   const goToNextWeek = () => setAnchorDate((prev) => shiftDate(prev, DAYS_PER_WEEK));
@@ -152,16 +161,17 @@ function WeeklyCalendar({ onSelectDate }: WeeklyCalendarProps) {
       <div className="grid grid-cols-7 gap-1 rounded-lg bg-white p-3">
         {weekDates.map((date, idx) => {
           const day = Number(date.slice(-2));
-          const isToday = date === TODAY_ISO;
+          const isToday = date === todayIso;
           const isSunday = idx === 6;
           const isSaturday = idx === 5;
           const tags = getTagsByDate(calendarData, date);
+          const dayChores = calendarData.find((dayData) => dayData.date === date)?.chores ?? [];
 
           return (
             <button
               key={date}
               type="button"
-              onClick={() => onSelectDate(date)}
+              onClick={() => onSelectDate(date, dayChores)}
               className="flex flex-col items-center gap-2"
             >
               <span

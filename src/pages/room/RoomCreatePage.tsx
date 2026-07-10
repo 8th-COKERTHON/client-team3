@@ -25,7 +25,7 @@ export default function RoomCreatePage() {
 
   const handleCreate = async () => {
     if (isCreated) {
-      navigate('/')
+      navigate('/main')
       return
     }
 
