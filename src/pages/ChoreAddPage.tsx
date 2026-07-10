@@ -246,11 +246,7 @@ export default function ChoreAddPage() {
         <label className="mb-1.5 block text-sm font-medium text-gray-700">
           난이도
         </label>
-        <DifficultySelector
-          value={difficulty}
-          onChange={setDifficulty}
-          disabled={isFromCatalog}
-        />
+        <DifficultySelector value={difficulty} onChange={setDifficulty} />
       </div>
 
         <TextBox
