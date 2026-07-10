@@ -1,13 +1,15 @@
-import { useState } from "react";
 import { Plus } from "lucide-react";
-import { familyMembers } from "../../mockData";
+import { familyMembers, MEMBER_BORDER_CLASS, MEMBER_TINT_CLASS, MEMBER_TEXT_CLASS } from "../../mockData";
 
 // 필터 칩 하나의 식별자 ("all" 또는 family member id)
-type FilterId = "all" | string;
+export type FilterId = "all" | string;
 
-function FamilyFilter() {
-  const [activeId, setActiveId] = useState<FilterId>("all");
+interface FamilyFilterProps {
+  activeId: FilterId;
+  onSelect: (id: FilterId) => void;
+}
 
+function FamilyFilter({ activeId, onSelect }: FamilyFilterProps) {
   return (
     // 가족 구성원 필터 섹션
     <section className="w-full">
@@ -15,7 +17,7 @@ function FamilyFilter() {
       <div className="mb-3 flex items-center gap-1.5">
         <h2 className="text-subtitle leading-tight font-bold text-gray-900">우리 방</h2>
         <span className="rounded-full bg-[#F0F0F6] px-2 py-0.5 text-caption leading-none font-medium text-gray-400">
-          3명
+          {familyMembers.length}명
         </span>
       </div>
 
@@ -24,7 +26,7 @@ function FamilyFilter() {
         {/* "전체" 칩 */}
         <button
           type="button"
-          onClick={() => setActiveId("all")}
+          onClick={() => onSelect("all")}
           className="flex w-12 shrink-0 flex-col items-center gap-1.5"
         >
           <span
@@ -49,17 +51,16 @@ function FamilyFilter() {
         {/* 가족 구성원 칩 목록 */}
         {familyMembers.map((member) => {
           const isActive = activeId === member.id;
-          const ringClass = member.isMe ? "border-brand" : "border-info";
-          const activeBgClass = member.isMe ? "bg-brand/10" : "bg-info/10";
-          const activeTextClass = member.isMe ? "text-brand" : "text-info";
-          const displayName = member.name.replace("(나)", "");
+          const ringClass = MEMBER_BORDER_CLASS[member.color];
+          const activeBgClass = MEMBER_TINT_CLASS[member.color];
+          const activeTextClass = MEMBER_TEXT_CLASS[member.color];
 
           return (
             <button
               key={member.id}
               type="button"
-              onClick={() => setActiveId(member.id)}
-              className="flex w-12 shrink-0 flex-col items-center gap-1.5"
+              onClick={() => onSelect(member.id)}
+              className="flex w-14 shrink-0 flex-col items-center gap-1.5"
             >
               {/* 아바타 + "나" 배지 래퍼 */}
               <span className="relative flex h-11 w-11 items-center justify-center">
@@ -73,7 +74,7 @@ function FamilyFilter() {
                       isActive ? activeTextClass : "text-gray-300"
                     }`}
                   >
-                    {displayName.slice(0, 1)}
+                    {member.fullName.slice(0, 1)}
                   </span>
                 </span>
 
@@ -85,9 +86,11 @@ function FamilyFilter() {
               </span>
 
               <span
-                className={`text-body-02 leading-none font-medium ${isActive ? "text-gray-900" : "text-gray-300"}`}
+                className={`text-body-02 leading-none font-medium whitespace-nowrap ${
+                  isActive ? "text-gray-900" : "text-gray-300"
+                }`}
               >
-                {displayName}
+                {member.fullName}
               </span>
             </button>
           );

@@ -28,6 +28,9 @@
   --color-category-trash: #34c77b;
   --color-category-cleaning: #a78bfa;
   --color-category-bathroom: #f5a524;
+
+  /* 가족 구성원 식별 색상 (오늘의 과업 담당자 구분용) */
+  --color-member-green: #34c77b;
 }
 
 @layer base {

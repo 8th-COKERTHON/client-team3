@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Header from "../components/common/Header";
-import FamilyFilter from "../components/Main/FamilyFilter";
+import FamilyFilter, { type FilterId } from "../components/Main/FamilyFilter";
 import WeeklyCalendar from "../components/Main/WeeklyCalender";
 import EmergencyAlert from "../components/Main/EmergencyAlert";
 import ChoreList from "../components/Main/ChoreList";
@@ -8,8 +8,13 @@ import { chores as initialChores, TODAY_ISO } from "../mockData";
 
 function MainPage() {
   const [chores, setChores] = useState(initialChores);
+  const [activeFilterId, setActiveFilterId] = useState<FilterId>("all");
 
   const todayChores = chores.filter((chore) => chore.date === TODAY_ISO);
+  const visibleChores =
+    activeFilterId === "all"
+      ? todayChores
+      : todayChores.filter((chore) => chore.assigneeId === activeFilterId);
   const urgentChore = todayChores.find((chore) => !chore.done);
 
   const handleToggle = (id: string) => {
@@ -26,7 +31,7 @@ function MainPage() {
 
       <div className="flex flex-col gap-5 px-5 py-4">
         {/* 가족 구성원 필터 섹션 */}
-        <FamilyFilter />
+        <FamilyFilter activeId={activeFilterId} onSelect={setActiveFilterId} />
 
         {/* 주간 달력 섹션 */}
         <WeeklyCalendar />
@@ -37,7 +42,7 @@ function MainPage() {
         )}
 
         {/* 오늘의 과업 섹션 */}
-        <ChoreList chores={todayChores} onToggle={handleToggle} />
+        <ChoreList chores={visibleChores} onToggle={handleToggle} />
       </div>
     </main>
   );

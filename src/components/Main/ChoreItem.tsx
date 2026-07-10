@@ -1,6 +1,6 @@
 import { Circle, CheckCircle2 } from "lucide-react";
 import type { Chore } from "../../mockData";
-import { CATEGORY_BG_CLASS, CATEGORY_TEXT_CLASS } from "../../mockData";
+import { MEMBER_BG_CLASS, MEMBER_TEXT_CLASS } from "../../mockData";
 
 interface ChoreItemProps {
   chore: Chore;
@@ -21,13 +21,13 @@ function DifficultyBar({ difficulty, filledClass }: { difficulty: number; filled
 }
 
 function ChoreItem({ chore, onToggle }: ChoreItemProps) {
-  const bgClass = CATEGORY_BG_CLASS[chore.category];
-  const textClass = CATEGORY_TEXT_CLASS[chore.category];
+  const bgClass = MEMBER_BG_CLASS[chore.color];
+  const textClass = MEMBER_TEXT_CLASS[chore.color];
 
   return (
     // 과업 리스트 로우
     <div className="flex items-center gap-3 py-3.5">
-      {/* 카테고리 색상 바 */}
+      {/* 담당자 색상 바 */}
       <span className={`h-10 w-[3px] shrink-0 rounded-full ${bgClass}`} />
 
       {/* 과업명 · 담당자 · 난이도 · 점수 */}
