@@ -8,7 +8,7 @@ import RoomJoinPage from './pages/room/RoomJoinPage'
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/room-entry" replace />} />
+      <Route path="/" element={<Navigate to="/signup" replace />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignUpPage />} />
       <Route path="/room-entry" element={<RoomEntryPage />} />

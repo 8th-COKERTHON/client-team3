@@ -1,14 +1,22 @@
 import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import CTAButton from '../../components/CTAButton'
 import Header from '../../components/Header'
 import { createGroup, saveGroupId } from '../../api/group'
 import { ApiError } from '../../types/api'
 
+interface RoomCreateLocationState {
+  groupId?: number
+  groupName?: string
+  inviteCode?: string
+}
+
 export default function RoomCreatePage() {
   const navigate = useNavigate()
-  const [roomName, setRoomName] = useState('우리집')
-  const [inviteCode, setInviteCode] = useState('')
+  const location = useLocation()
+  const locationState = (location.state ?? {}) as RoomCreateLocationState
+  const [roomName, setRoomName] = useState(locationState.groupName ?? '우리집')
+  const [inviteCode, setInviteCode] = useState(locationState.inviteCode ?? '')
   const [errorMessage, setErrorMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 

@@ -1,6 +1,9 @@
+import { useState } from 'react'
 import { IconArrowRight, IconHomeFilled, IconKeyFilled } from '@tabler/icons-react'
 import { useNavigate } from 'react-router-dom'
+import { createGroup, saveGroupId } from '../../api/group'
 import HouseIcon from '../../assets/house.svg'
+import { ApiError } from '../../types/api'
 
 function EntryCard({
   title,
@@ -45,6 +48,36 @@ function EntryCard({
 
 export default function RoomEntryPage() {
   const navigate = useNavigate()
+  const [errorMessage, setErrorMessage] = useState('')
+  const [isCreatingGroup, setIsCreatingGroup] = useState(false)
+
+  const handleCreateRoom = async () => {
+    try {
+      setIsCreatingGroup(true)
+      setErrorMessage('')
+
+      const response = await createGroup({
+        groupName: '우리집',
+      })
+
+      saveGroupId(response.data.groupId)
+      navigate('/room/create', {
+        state: {
+          groupId: response.data.groupId,
+          groupName: response.data.groupName,
+          inviteCode: response.data.inviteCode,
+        },
+      })
+    } catch (error) {
+      if (error instanceof ApiError) {
+        setErrorMessage(error.message)
+      } else {
+        setErrorMessage('방 생성 중 오류가 발생했습니다.')
+      }
+    } finally {
+      setIsCreatingGroup(false)
+    }
+  }
 
   return (
     <main className="flex w-full h-dvh flex-col bg-[#F5F5FA] items-start justify-center gap-9">
@@ -64,11 +97,11 @@ export default function RoomEntryPage() {
 
       <section className="w-full flex flex-col gap-3 items-center">
         <EntryCard
-          title="방 만들기"
+          title={isCreatingGroup ? '방 생성 중...' : '방 만들기'}
           description="새로운 방을 만들고 멤버를 초대해요"
           icon={<IconHomeFilled size={28} className="text-brand" />}
           highlighted
-          onClick={() => navigate('/room/create')}
+          onClick={handleCreateRoom}
         />
         <EntryCard
           title="초대코드로 참여"
@@ -76,6 +109,11 @@ export default function RoomEntryPage() {
           icon={<IconKeyFilled size={28} className="text-[#F4B000]" />}
           onClick={() => navigate('/room/join')}
         />
+        {errorMessage && (
+          <p className="px-5 text-center text-body-02 font-medium leading-[1.5] text-brand">
+            {errorMessage}
+          </p>
+        )}
       </section>
     </main>
   )

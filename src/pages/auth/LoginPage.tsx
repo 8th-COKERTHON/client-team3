@@ -4,9 +4,14 @@ import CTAButton from '../../components/CTAButton'
 import AuthInput from '../../components/AuthInput'
 import Header from '../../components/Header'
 import { login } from '../../api/auth'
+import { clearSavedGroupId, saveGroupId } from '../../api/group'
 import { ApiError } from '../../types/api'
 
 type LoginField = 'loginId' | 'password'
+
+function isValidPassword(password: string) {
+  return password.length >= 8 && /\d/.test(password)
+}
 
 function LoginPage() {
   const navigate = useNavigate()
@@ -26,8 +31,8 @@ function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const validateField = (field: LoginField, nextForm = form) => {
-    if (field === 'password' && nextForm.password.length > 0 && nextForm.password.length < 8) {
-      return '비밀번호는 8자 이상이어야 합니다.'
+    if (field === 'password' && nextForm.password.length > 0 && !isValidPassword(nextForm.password)) {
+      return '비밀번호는 8자 이상이며 숫자를 포함해야 합니다.'
     }
     return ''
   }
@@ -50,7 +55,7 @@ function LoginPage() {
   const handleBlur = (field: LoginField) => () => {
     setTouched((prev) => ({ ...prev, [field]: true }))
     setFieldErrors((prev) => ({ ...prev, [field]: validateField(field) }))
-    }
+  }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -73,14 +78,15 @@ function LoginPage() {
       setIsSubmitting(true)
       setErrorMessage('')
 
-      await login(form)
-      const shouldGoRoomEntry = window.sessionStorage.getItem('post-signup') === 'true'
+      const response = await login(form)
+      const [groupId] = response.data.groupIds
 
-      if (shouldGoRoomEntry) {
-        window.sessionStorage.removeItem('post-signup')
-        navigate('/room-entry')
-      } else {
+      if (groupId) {
+        saveGroupId(groupId)
         navigate('/')
+      } else {
+        clearSavedGroupId()
+        navigate('/room-entry')
       }
     } catch (error) {
       if (error instanceof ApiError) {

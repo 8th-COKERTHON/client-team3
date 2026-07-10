@@ -2,6 +2,7 @@ export interface AuthUser {
   id: number
   nickname: string
   loginId: string
+  groupIds: number[]
 }
 
 export interface SignUpRequest {

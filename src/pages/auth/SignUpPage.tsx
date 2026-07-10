@@ -8,6 +8,10 @@ import { ApiError } from '../../types/api'
 
 type SignUpField = 'name' | 'loginId' | 'password' | 'confirmPassword'
 
+function isValidPassword(password: string) {
+  return password.length >= 8 && /\d/.test(password)
+}
+
 function SignUpPage() {
   const navigate = useNavigate()
   const [form, setForm] = useState({
@@ -32,15 +36,35 @@ function SignUpPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const validateField = (field: SignUpField, nextForm = form) => {
+    if (field === 'name') {
+      if (!nextForm.name.trim()) {
+        return '이름을 입력해주세요.'
+      }
+      return ''
+    }
+
+    if (field === 'loginId') {
+      if (!nextForm.loginId.trim()) {
+        return '아이디를 입력해주세요.'
+      }
+      return ''
+    }
+
     if (field === 'password') {
-      if (nextForm.password.length > 0 && nextForm.password.length < 8) {
-        return '비밀번호는 8자 이상이어야 합니다.'
+      if (!nextForm.password.trim()) {
+        return '비밀번호를 입력해주세요.'
+      }
+      if (!isValidPassword(nextForm.password)) {
+        return '비밀번호는 8자 이상이며 숫자를 포함해야 합니다.'
       }
       return ''
     }
 
     if (field === 'confirmPassword') {
-      if (nextForm.confirmPassword.length > 0 && nextForm.password !== nextForm.confirmPassword) {
+      if (!nextForm.confirmPassword.trim()) {
+        return '비밀번호를 확인해주세요.'
+      }
+      if (nextForm.password !== nextForm.confirmPassword) {
         return '비밀번호가 일치하지 않습니다.'
       }
       return ''
@@ -91,6 +115,13 @@ function SignUpPage() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
+    const nextFieldErrors = {
+      name: validateField('name'),
+      loginId: validateField('loginId'),
+      password: validateField('password'),
+      confirmPassword: validateField('confirmPassword'),
+    }
+
     setTouched({
       name: true,
       loginId: true,
@@ -98,18 +129,9 @@ function SignUpPage() {
       confirmPassword: true,
     })
 
-    setFieldErrors({
-      name: validateField('name'),
-      loginId: validateField('loginId'),
-      password: validateField('password'),
-      confirmPassword: validateField('confirmPassword'),
-    })
+    setFieldErrors(nextFieldErrors)
 
-    if (validateField('password')) {
-      return
-    }
-
-    if (validateField('confirmPassword')) {
+    if (Object.values(nextFieldErrors).some(Boolean)) {
       return
     }
 
@@ -118,13 +140,12 @@ function SignUpPage() {
       setErrorMessage('')
 
       await signUp({
-        name: form.name,
-        loginId: form.loginId,
+        name: form.name.trim(),
+        loginId: form.loginId.trim(),
         password: form.password,
         passwordCheck: form.confirmPassword,
       })
 
-      window.sessionStorage.setItem('post-signup', 'true')
       navigate('/login')
     } catch (error) {
       if (error instanceof ApiError) {
