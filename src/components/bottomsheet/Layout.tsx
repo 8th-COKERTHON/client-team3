@@ -14,12 +14,12 @@ function BottomIndicator() {
 
 export default function Layout({ children }: BottomSheetLayoutProps) {
   return (
-    <section className="flex w-full flex-col rounded-t-8 bg-white border border-red-500">
+    <section className="flex w-full flex-col rounded-t-[32px] bg-white border border-red-500">
       <div className="flex w-full items-center justify-center pt-4 pb-6">
         <BottomHandle />
       </div>
 
-      <div className="p-5">
+      <div className="w-full p-5">
         {children}
       </div>
 
