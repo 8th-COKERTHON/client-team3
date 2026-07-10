@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
 import Header from "../components/common/Header";
 import BottomNav from "../components/BottomNav";
@@ -38,8 +38,7 @@ function mapBoardToMainChores(board: ChoreBoardItem[], members: FamilyMember[]) 
 
 function MainPage() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const [groupId, setGroupId] = useState<number | null>(null);
+  const groupId = useMemo(() => getSavedGroupId(), []);
   const [members, setMembers] = useState<FamilyMember[]>([]);
   const [chores, setChores] = useState<MainChore[]>([]);
   const [activeFilterId, setActiveFilterId] = useState<FilterId>("all");
@@ -62,20 +61,15 @@ function MainPage() {
       : todayChores.filter((chore) => String(chore.assigneeId) === activeFilterId);
   const urgentChore = todayChores.find((chore) => !chore.done);
   const selectedChore: MainChore | null =
-    chores.find((chore) => chore.choreId === selectedChoreId) ??
-    selectedDateChores.find((chore) => chore.choreId === selectedChoreId) ??
+    chores.find((chore) => chore.id === selectedChoreId) ??
+    selectedDateChores.find((chore) => chore.id === selectedChoreId) ??
     null;
 
   useEffect(() => {
-    const savedGroupId = getSavedGroupId();
-
-    if (!savedGroupId) {
+    if (!groupId) {
       navigate("/room-entry", { replace: true });
-      return;
     }
-
-    setGroupId(savedGroupId);
-  }, [navigate]);
+  }, [groupId, navigate]);
 
   useEffect(() => {
     if (!groupId) {
@@ -137,20 +131,20 @@ function MainPage() {
     setChores((prev) =>
       prev
         .map((chore) =>
-          chore.choreId === updatedChore.choreId ? buildMainChoreFromBoard(updatedChore, members) : chore,
+          chore.id === updatedChore.id ? buildMainChoreFromBoard(updatedChore, members) : chore,
         )
         .sort(sortChoresByDone),
     );
     setSelectedDateChores((prev) =>
       prev
         .map((chore) =>
-          chore.choreId === updatedChore.choreId ? buildMainChoreFromBoard(updatedChore, members) : chore,
+          chore.id === updatedChore.id ? buildMainChoreFromBoard(updatedChore, members) : chore,
         )
         .sort(sortChoresByDone),
     );
   };
 
-  const handleToggle = async (choreId: number, done: boolean) => {
+  const handleToggle = async (groupChoreId: number, done: boolean) => {
     if (!groupId) {
       return;
     }
@@ -158,7 +152,7 @@ function MainPage() {
     const nextStatus: ChoreStatus = done ? "SCHEDULED" : "DONE";
 
     try {
-      const response = await updateChoreStatus(groupId, choreId, nextStatus);
+      const response = await updateChoreStatus(groupId, groupChoreId, nextStatus);
       syncUpdatedChore(response.data);
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "과업 상태를 변경하지 못했어요.");
@@ -193,16 +187,6 @@ function MainPage() {
       setIsInviteCodeLoading(false);
     }
   };
-
-  useEffect(() => {
-    setSelectedDate(null);
-    setSelectedDateChores([]);
-    setSelectedChoreId(null);
-    setIsInviteSheetOpen(false);
-    setInviteCode("");
-    setInviteCodeErrorMessage(null);
-    setIsInviteCodeLoading(false);
-  }, [location.pathname]);
 
   if (isLoading && groupId) {
     return (
@@ -243,7 +227,7 @@ function MainPage() {
         <ChoreList
           chores={visibleChores}
           onToggle={handleToggle}
-          onOpenDetail={(chore) => setSelectedChoreId(chore.choreId)}
+          onOpenDetail={(chore) => setSelectedChoreId(chore.id)}
         />
       </div>
 
@@ -273,7 +257,7 @@ function MainPage() {
       {selectedChore && groupId && (
         <TaskDetailBottomSheet
           groupId={groupId}
-          choreId={selectedChore.choreId}
+          groupChoreId={selectedChore.id}
           members={members.map((member) => ({ id: String(member.id), label: member.fullName }))}
           onStatusUpdated={syncUpdatedChore}
           onClose={() => setSelectedChoreId(null)}

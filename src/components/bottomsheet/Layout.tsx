@@ -20,7 +20,7 @@ export default function Layout({ children, onClose }: BottomSheetLayoutProps) {
       onClick={onClose}
     >
       <section
-        className="relative flex w-full flex-col rounded-t-[32px] bg-white"
+        className="relative mx-auto flex w-full max-w-md flex-col rounded-t-[32px] bg-white"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex w-full items-center justify-center pt-4 pb-6">

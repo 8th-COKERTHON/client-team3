@@ -66,7 +66,7 @@ function buildChartBackground(members: ReportMember[]) {
 
 function ReportPage() {
   const navigate = useNavigate();
-  const [groupId, setGroupId] = useState<number | null>(null);
+  const groupId = useMemo(() => getSavedGroupId(), []);
   const [members, setMembers] = useState<FamilyMember[]>([]);
   const [reportMembers, setReportMembers] = useState<ReportMember[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -76,15 +76,10 @@ function ReportPage() {
   const savedUserNickname = useMemo(() => getSavedUserNickname(), []);
 
   useEffect(() => {
-    const savedGroupId = getSavedGroupId();
-
-    if (!savedGroupId) {
+    if (!groupId) {
       navigate("/room-entry", { replace: true });
-      return;
     }
-
-    setGroupId(savedGroupId);
-  }, [navigate]);
+  }, [groupId, navigate]);
 
   useEffect(() => {
     if (!groupId) {
@@ -161,7 +156,7 @@ function ReportPage() {
   const weekLabel = useMemo(() => getWeekOfMonthLabel(anchorDate), [anchorDate]);
 
   return (
-    <main className="relative min-h-screen w-full max-w-md mx-auto #F5F5FA pb-[calc(var(--bottom-nav-height)+var(--safe-bottom))]">
+    <main className="relative min-h-screen w-full max-w-md mx-auto bg-white pb-[calc(var(--bottom-nav-height)+var(--safe-bottom))]">
       <Header title="리포트" profileInitial={profileInitial} />
 
       <div className="flex flex-col gap-5 px-5 pb-4 pt-0">

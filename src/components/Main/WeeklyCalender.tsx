@@ -4,7 +4,6 @@ import { fetchCalendarChores } from "../../api/calendar";
 import type { ApiChore, CalendarDayChores } from "../../types/calendar";
 import {
   CATEGORY_BG_CLASS,
-  CATEGORY_LABEL,
   CATEGORY_TEXT_CLASS,
   CATEGORY_TINT_CLASS,
   getTodayIsoDate,
@@ -49,30 +48,27 @@ interface DayTag {
   tintClass: string;
 }
 
-// 특정 날짜의 과업 카테고리 태그 목록(중복 제거, 최대 MAX_TAGS_PER_DAY개)을 계산
+// 특정 날짜의 과업 태그 목록(최대 MAX_TAGS_PER_DAY개)을 계산
 function getTagsByDate(calendarData: CalendarDayChores[], date: string): DayTag[] {
   const dayChores = calendarData.find((day) => day.date === date)?.chores ?? [];
   const tags: DayTag[] = [];
-  const seenKeys = new Set<string>();
 
   for (const chore of dayChores) {
-    const resolved = resolveChoreCategory(chore.category);
-    const key = resolved ?? chore.category;
-    if (seenKeys.has(key)) continue;
-    seenKeys.add(key);
+    const resolved = resolveChoreCategory(chore.category, chore.name);
+    const key = String(chore.id);
 
     tags.push(
       resolved
         ? {
             key,
-            label: CATEGORY_LABEL[resolved],
+            label: chore.name,
             bgClass: CATEGORY_BG_CLASS[resolved],
             textClass: CATEGORY_TEXT_CLASS[resolved],
             tintClass: CATEGORY_TINT_CLASS[resolved],
           }
         : {
             key,
-            label: chore.category,
+            label: chore.name,
             bgClass: "bg-gray-400",
             textClass: "text-gray-400",
             tintClass: "bg-gray-100",
@@ -154,7 +150,7 @@ function WeeklyCalendar({ groupId, onSelectDate }: WeeklyCalendarProps) {
         <p className="mb-2 text-caption leading-none font-medium text-gray-300">{error}</p>
       )}
 
-      <div className="grid grid-cols-7 gap-1 rounded-[28px] bg-[#FCFCFE] px-2 py-4">
+      <div className="grid grid-cols-7 gap-1 overflow-visible rounded-[28px] bg-[#FCFCFE] px-3 py-3">
         {weekDates.map((date, idx) => {
           const day = Number(date.slice(-2));
           const isToday = date === todayIso;
@@ -168,7 +164,7 @@ function WeeklyCalendar({ groupId, onSelectDate }: WeeklyCalendarProps) {
               key={date}
               type="button"
               onClick={() => onSelectDate(date, dayChores)}
-              className="flex min-h-[118px] flex-col items-center gap-2 rounded-2xl px-0.5 py-1"
+              className="flex min-h-[92px] flex-col items-center gap-2 overflow-visible rounded-2xl px-0.5 py-1"
             >
               <span
                 className={`text-caption leading-none font-medium ${
@@ -186,14 +182,16 @@ function WeeklyCalendar({ groupId, onSelectDate }: WeeklyCalendarProps) {
                 {day}
               </span>
 
-              <div className="flex w-full flex-col items-stretch gap-1">
+              <div className="mt-1 flex w-full flex-col items-center gap-1 overflow-visible">
                 {tags.map((tag) => (
                   <span
                     key={tag.key}
-                    className={`flex items-center justify-center gap-1 rounded-full px-1.5 py-1 ${tag.tintClass}`}
+                    className={`flex w-max items-center justify-start gap-1 rounded-full px-1.5 py-1 whitespace-nowrap ${tag.tintClass}`}
                   >
                     <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${tag.bgClass}`} />
-                    <span className={`text-caption leading-none font-medium ${tag.textClass}`}>
+                    <span
+                      className={`max-w-[52px] truncate text-[9px] leading-none font-medium ${tag.textClass}`}
+                    >
                       {tag.label}
                     </span>
                   </span>

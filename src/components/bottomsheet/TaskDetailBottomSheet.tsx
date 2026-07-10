@@ -19,21 +19,21 @@ interface MemberOption {
 
 interface TaskDetailBottomSheetProps {
   groupId: number
-  choreId: number
+  groupChoreId: number
   members?: MemberOption[]
   onStatusUpdated?: (updatedChore: ChoreBoardItem) => void
   onClose?: () => void
 }
 
-function findChoreById(board: ChoreBoardResponse, choreId: number) {
+function findChoreById(board: ChoreBoardResponse, groupChoreId: number) {
   return [...board.scheduled, ...board.inProgress, ...board.done].find(
-    (item) => item.choreId === choreId,
+    (item) => item.id === groupChoreId,
   )
 }
 
 export default function TaskDetailBottomSheet({
   groupId,
-  choreId,
+  groupChoreId,
   members = [],
   onStatusUpdated,
   onClose,
@@ -51,7 +51,7 @@ export default function TaskDetailBottomSheet({
         setIsLoading(true)
 
         const response = await getChoreBoard(groupId)
-        const targetChore = findChoreById(response.data, choreId)
+        const targetChore = findChoreById(response.data, groupChoreId)
 
         if (!targetChore) {
           return
@@ -65,7 +65,7 @@ export default function TaskDetailBottomSheet({
     }
 
     void fetchChore()
-  }, [groupId, choreId])
+  }, [groupId, groupChoreId])
 
   const selectedMemberId = useMemo(() => {
     return members.find((member) => member.label === chore?.assigneeName)?.id ?? members[0]?.id ?? ''
@@ -85,7 +85,7 @@ export default function TaskDetailBottomSheet({
 
       const response = await updateChoreStatus(
         groupId,
-        chore.choreId,
+        chore.id,
         CHORE_OPTION_TO_STATUS[selectedStatus],
       )
 
@@ -156,7 +156,7 @@ export default function TaskDetailBottomSheet({
         </div>
 
         <div className='flex flex-col w-full items-center gap-1 py-[10px]'>
-          <CTAButton onClick={handleRequest} disabled={isSubmitting} className="w-full">
+          <CTAButton onClick={handleRequest} disabled={isSubmitting || isRequested} className="w-full">
             수행 요청하기
           </CTAButton>
           {isRequested && (

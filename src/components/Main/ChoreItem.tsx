@@ -73,7 +73,7 @@ function ChoreItem({ chore, onToggle, onOpenDetail }: ChoreItemProps) {
         type="button"
         onClick={(event) => {
           event.stopPropagation();
-          onToggle?.(chore.choreId, chore.done);
+          onToggle?.(chore.id, chore.done);
         }}
         aria-pressed={chore.done}
         className="flex h-7 w-7 shrink-0 items-center justify-center text-gray-900"
