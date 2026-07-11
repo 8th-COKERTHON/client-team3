@@ -10,12 +10,22 @@ interface HeaderProps {
   profileInitial?: string;
   onBack?: () => void;
   showActions?: boolean;
+  backgroundClassName?: string;
+  compact?: boolean;
 }
 
-function Header({ title, profileInitial = "?", onBack, showActions = false }: HeaderProps) {
+function Header({
+  title,
+  profileInitial = "?",
+  onBack,
+  showActions = false,
+  backgroundClassName = "bg-white",
+  compact = false,
+}: HeaderProps) {
   const navigate = useNavigate();
   const [hasUnread, setHasUnread] = useState(false);
   const shouldBalanceTitle = Boolean(onBack && title);
+  const isBackHeader = Boolean(onBack) && !showActions;
 
   // 벨 빨간 점 표시 여부를 주기적으로 폴링
   useEffect(() => {
@@ -46,10 +56,18 @@ function Header({ title, profileInitial = "?", onBack, showActions = false }: He
   }, [showActions]);
   return (
     <header
-      className={`relative flex w-full items-center bg-white px-5 pb-3 ${
+      className={`relative flex w-full items-center px-5 ${
+        isBackHeader ? "h-12" : compact ? "pb-1" : "pb-3"
+      } ${backgroundClassName} ${
         showActions ? "justify-between" : "justify-start"
       }`}
-      style={{ paddingTop: "calc(var(--safe-top) + 12px)" }}
+      style={{
+        paddingTop: isBackHeader
+          ? "var(--safe-top)"
+          : compact
+            ? "calc(var(--safe-top) + 8px)"
+            : "calc(var(--safe-top) + 12px)",
+      }}
     >
       {onBack ? (
         <button
