@@ -42,7 +42,8 @@ export default function TaskDetailBottomSheet({
   const [chore, setChore] = useState<ChoreBoardItem | null>(null)
   const [selectedStatus, setSelectedStatus] = useState<ChoreStatusOption>('pending')
   const [isRequested, setIsRequested] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
+  const [isRequesting, setIsRequesting] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [selectedMember, setSelectedMember] = useState('')
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -77,38 +78,54 @@ export default function TaskDetailBottomSheet({
     setSelectedMember(selectedMemberId)
   }, [selectedMemberId])
 
+  const handleStatusChange = async (nextStatus: ChoreStatusOption) => {
+    if (!chore || !selectedMember) {
+      return
+    }
+
+    if (nextStatus === selectedStatus) {
+      return
+    }
+
+    try {
+      setIsUpdatingStatus(true)
+      setErrorMessage(null)
+      const response = await updateChoreStatus(
+        groupId,
+        chore.id,
+        CHORE_OPTION_TO_STATUS[nextStatus],
+        nextStatus === 'done' ? Number(selectedMember) : undefined,
+      )
+
+      setChore(response.data)
+      setSelectedStatus(CHORE_STATUS_TO_OPTION[response.data.status])
+      onStatusUpdated?.(response.data)
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : '상태를 변경하지 못했어요.')
+    } finally {
+      setIsUpdatingStatus(false)
+    }
+  }
+
   const handleRequest = async () => {
     if (!chore || !selectedMember) {
       return
     }
 
     try {
-      setIsSubmitting(true)
+      setIsRequesting(true)
       setErrorMessage(null)
-      if (selectedStatus === 'done') {
-        const response = await updateChoreStatus(
-          groupId,
-          chore.id,
-          CHORE_OPTION_TO_STATUS[selectedStatus],
-          Number(selectedMember),
-        )
+      await sendChoreRequest({
+        receiverId: Number(selectedMember),
+        choreId: chore.id,
+        choreName: chore.name,
+      })
 
-        setChore(response.data)
-        setSelectedStatus(CHORE_STATUS_TO_OPTION[response.data.status])
-        onStatusUpdated?.(response.data)
-      } else {
-        await sendChoreRequest({
-          receiverId: Number(selectedMember),
-          choreId: chore.id,
-          choreName: chore.name,
-        })
-
-        setIsRequested(true)
-      }
+      setIsRequested(true)
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : '수행 요청을 보내지 못했어요.')
     } finally {
-      setIsSubmitting(false)
+      setIsRequesting(false)
     }
   }
 
@@ -150,29 +167,34 @@ export default function TaskDetailBottomSheet({
             <StatButton
               status="pending"
               selected={selectedStatus === 'pending'}
-              onClick={() => setSelectedStatus('pending')}
+              onClick={() => void handleStatusChange('pending')}
               className="w-full min-w-0"
             />
             <StatButton
               status="inProgress"
               selected={selectedStatus === 'inProgress'}
-              onClick={() => setSelectedStatus('inProgress')}
+              onClick={() => void handleStatusChange('inProgress')}
               className="w-full min-w-0"
             />
             <StatButton
               status="done"
               selected={selectedStatus === 'done'}
-              onClick={() => setSelectedStatus('done')}
+              onClick={() => void handleStatusChange('done')}
               className="w-full min-w-0"
             />
           </div>
+          {isUpdatingStatus && (
+            <p className="mt-2 text-body-02 leading-[1.5] font-medium text-gray">
+              상태를 변경하는 중...
+            </p>
+          )}
 
         </div>
 
         <div className='flex flex-col w-full items-center gap-1 py-[10px]'>
           <CTAButton
             onClick={handleRequest}
-            disabled={isSubmitting || (selectedStatus !== 'done' && isRequested) || !selectedMember}
+            disabled={isRequesting || isRequested || !selectedMember}
             className="w-full"
           >
             수행 요청하기
