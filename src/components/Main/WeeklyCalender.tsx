@@ -14,6 +14,13 @@ const WEEKDAY_LABELS = ["월", "화", "수", "목", "금", "토", "일"];
 const MAX_TAGS_PER_DAY = 2;
 const DAYS_PER_WEEK = 7;
 
+function formatLocalIsoDate(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 // 기준 날짜가 포함된 주(월~일)의 날짜 목록을 계산
 function getWeekDates(isoDate: string): string[] {
   const base = new Date(isoDate);
@@ -24,7 +31,7 @@ function getWeekDates(isoDate: string): string[] {
   return Array.from({ length: DAYS_PER_WEEK }, (_, i) => {
     const d = new Date(monday);
     d.setDate(monday.getDate() + i);
-    return d.toISOString().slice(0, 10);
+    return formatLocalIsoDate(d);
   });
 }
 
@@ -32,7 +39,7 @@ function getWeekDates(isoDate: string): string[] {
 function shiftDate(isoDate: string, days: number): string {
   const d = new Date(isoDate);
   d.setDate(d.getDate() + days);
-  return d.toISOString().slice(0, 10);
+  return formatLocalIsoDate(d);
 }
 
 function formatMonthLabel(isoDate: string): string {
