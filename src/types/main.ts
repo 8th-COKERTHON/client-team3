@@ -1,5 +1,5 @@
 import type { ApiChore } from "./calendar";
-import type { ChoreBoardItem } from "./chore";
+import type { ChoreBoardItem, ChoreStatus } from "./chore";
 import type { GroupMember } from "./group";
 
 export type ChoreCategory = "kitchen" | "cleaning" | "trash" | "laundry" | "bathroom";
@@ -22,8 +22,84 @@ export interface MainChore {
   assigneeName: string;
   color: MemberColor;
   point: number;
+  status: ChoreStatus;
   done: boolean;
   date: string;
+}
+
+const WEEKDAY_CODES = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"] as const;
+
+function parseLocalIsoDate(isoDate: string) {
+  const [year, month, day] = isoDate.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+export function formatLocalIsoDate(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function getWeekdayCodeFromIsoDate(isoDate: string) {
+  const weekday = parseLocalIsoDate(isoDate).getDay();
+  return WEEKDAY_CODES[(weekday + 6) % 7];
+}
+
+function parseRepeatWeekdays(repeatPattern?: string | null) {
+  return (repeatPattern ?? "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function getDaysDiff(startDate: string, targetDate: string) {
+  const start = parseLocalIsoDate(startDate);
+  const target = parseLocalIsoDate(targetDate);
+  const diffMs = target.getTime() - start.getTime();
+  return Math.floor(diffMs / (1000 * 60 * 60 * 24));
+}
+
+export function choreOccursOnDate(
+  chore: Pick<ChoreBoardItem, "date" | "repeatCycle" | "repeatPattern">,
+  targetDate: string,
+) {
+  const daysDiff = getDaysDiff(chore.date, targetDate);
+  if (daysDiff < 0) {
+    return false;
+  }
+
+  switch (chore.repeatCycle) {
+    case "DAILY":
+      return true;
+    case "WEEKLY": {
+      const repeatWeekdays = parseRepeatWeekdays(chore.repeatPattern);
+      if (repeatWeekdays.length === 0) {
+        return chore.date === targetDate;
+      }
+      return repeatWeekdays.includes(getWeekdayCodeFromIsoDate(targetDate));
+    }
+    case "BIWEEKLY": {
+      const repeatWeekdays = parseRepeatWeekdays(chore.repeatPattern);
+      if (repeatWeekdays.length === 0) {
+        return daysDiff % 14 === 0;
+      }
+      return Math.floor(daysDiff / 7) % 2 === 0 && repeatWeekdays.includes(getWeekdayCodeFromIsoDate(targetDate));
+    }
+    case "MONTHLY": {
+      const start = parseLocalIsoDate(chore.date);
+      const target = parseLocalIsoDate(targetDate);
+      return start.getDate() === target.getDate();
+    }
+    case "YEARLY": {
+      const start = parseLocalIsoDate(chore.date);
+      const target = parseLocalIsoDate(targetDate);
+      return start.getMonth() === target.getMonth() && start.getDate() === target.getDate();
+    }
+    case "NONE":
+    default:
+      return chore.date === targetDate;
+  }
 }
 
 const MEMBER_COLORS: MemberColor[] = ["red", "blue", "green"];
@@ -131,9 +207,31 @@ export function buildMainChoreFromBoard(chore: ChoreBoardItem, members: FamilyMe
     assigneeName: chore.assigneeName,
     color: getMemberColor(chore.assigneeId, members),
     point: chore.score,
+    status: chore.status,
     done: chore.status === "DONE",
     date: chore.date,
   };
+}
+
+export function buildMainChoreOccurrenceFromBoard(
+  chore: ChoreBoardItem,
+  members: FamilyMember[],
+  date: string,
+): MainChore {
+  return {
+    ...buildMainChoreFromBoard(chore, members),
+    date,
+  };
+}
+
+export function expandBoardChoresForDate(
+  chores: ChoreBoardItem[],
+  members: FamilyMember[],
+  date: string,
+) {
+  return chores
+    .filter((chore) => choreOccursOnDate(chore, date))
+    .map((chore) => buildMainChoreOccurrenceFromBoard(chore, members, date));
 }
 
 export function buildMainChoreFromCalendar(chore: ApiChore, members: FamilyMember[]): MainChore {
@@ -147,6 +245,7 @@ export function buildMainChoreFromCalendar(chore: ApiChore, members: FamilyMembe
     assigneeName: chore.assigneeName,
     color: getMemberColor(chore.assigneeId, members),
     point: chore.score,
+    status: chore.status as ChoreStatus,
     done: chore.status === "DONE",
     date: chore.date,
   };
