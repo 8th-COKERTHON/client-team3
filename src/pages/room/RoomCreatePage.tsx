@@ -58,7 +58,12 @@ export default function RoomCreatePage() {
 
   return (
     <main className="relative flex h-dvh w-full flex-col items-center bg-[#F5F5FA] gap-4">
-      <Header title="" onBack={() => navigate(-1)} />
+      <Header
+        title=""
+        onBack={() => navigate(-1)}
+        backgroundClassName="bg-[#F5F5FA]"
+        compact
+      />
 
       <section className="flex flex-1 flex-col w-full items-center">
         <div className="w-[350px] rounded-[24px] bg-white p-5 shadow-[0_2px_20px_rgba(0, 0, 0, 0,06)]">

@@ -78,6 +78,8 @@ export default function TaskDetailBottomSheet({
     setSelectedMember(selectedMemberId)
   }, [selectedMemberId])
 
+  const isRequestDisabledByStatus = selectedStatus === 'done'
+
   const handleStatusChange = async (nextStatus: ChoreStatusOption) => {
     if (!chore || !selectedMember) {
       return
@@ -97,9 +99,23 @@ export default function TaskDetailBottomSheet({
         nextStatus === 'done' ? Number(selectedMember) : undefined,
       )
 
-      setChore(response.data)
+      setChore({
+        ...response.data,
+        assigneeId: nextStatus === 'done' ? Number(selectedMember) : response.data.assigneeId,
+        assigneeName:
+          nextStatus === 'done'
+            ? members.find((member) => member.id === selectedMember)?.label ?? response.data.assigneeName
+            : response.data.assigneeName,
+      })
       setSelectedStatus(CHORE_STATUS_TO_OPTION[response.data.status])
-      onStatusUpdated?.(response.data)
+      onStatusUpdated?.({
+        ...response.data,
+        assigneeId: nextStatus === 'done' ? Number(selectedMember) : response.data.assigneeId,
+        assigneeName:
+          nextStatus === 'done'
+            ? members.find((member) => member.id === selectedMember)?.label ?? response.data.assigneeName
+            : response.data.assigneeName,
+      })
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : '상태를 변경하지 못했어요.')
     } finally {
@@ -194,7 +210,7 @@ export default function TaskDetailBottomSheet({
         <div className='flex flex-col w-full items-center gap-1 py-[10px]'>
           <CTAButton
             onClick={handleRequest}
-            disabled={isRequesting || isRequested || !selectedMember}
+            disabled={isRequestDisabledByStatus || isRequesting || isRequested || !selectedMember}
             className="w-full"
           >
             수행 요청하기

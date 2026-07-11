@@ -1,4 +1,4 @@
-import { Circle, CheckCircle2 } from "lucide-react";
+import { Circle, CheckCircle2, CircleDashed } from "lucide-react";
 import { MEMBER_BG_CLASS, MEMBER_TEXT_CLASS, type MainChore } from "../../types/main";
 
 interface ChoreItemProps {
@@ -32,6 +32,7 @@ function DifficultyBar({
 function ChoreItem({ chore, onToggle, onOpenDetail }: ChoreItemProps) {
   const bgClass = MEMBER_BG_CLASS[chore.color];
   const textClass = MEMBER_TEXT_CLASS[chore.color];
+  const isInProgress = chore.status === "IN_PROGRESS";
 
   return (
     // 과업 리스트 로우 (카드 클릭 시 상세 상태 모달)
@@ -73,15 +74,20 @@ function ChoreItem({ chore, onToggle, onOpenDetail }: ChoreItemProps) {
         type="button"
         onClick={(event) => {
           event.stopPropagation();
+          if (isInProgress) {
+            return;
+          }
           onToggle?.(chore.id, chore.done);
         }}
         aria-pressed={chore.done}
-        disabled={!onToggle}
+        disabled={!onToggle || isInProgress}
         className={`flex h-7 w-7 shrink-0 items-center justify-center text-gray-900 ${
-          onToggle ? "" : "cursor-default"
+          onToggle && !isInProgress ? "" : "cursor-default"
         }`}
       >
-        {chore.done ? (
+        {isInProgress ? (
+          <CircleDashed size={22} strokeWidth={2} className="text-gray-400" />
+        ) : chore.done ? (
           <CheckCircle2 size={24} strokeWidth={1.5} />
         ) : (
           <Circle size={24} strokeWidth={1.5} className="text-gray-300" />

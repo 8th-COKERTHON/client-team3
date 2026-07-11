@@ -33,6 +33,41 @@ function getWeekdayCode(isoDate: string) {
   return WEEKDAY_OPTIONS[(weekday + 6) % 7].value;
 }
 
+function getNextRepeatDate(baseDate: string, weekdays: string[]) {
+  if (weekdays.length === 0) {
+    return baseDate;
+  }
+
+  const weekdayIndices = new Set(
+    weekdays
+      .map((weekday) => WEEKDAY_OPTIONS.findIndex((option) => option.value === weekday))
+      .filter((index) => index >= 0),
+  );
+
+  if (weekdayIndices.size === 0) {
+    return baseDate;
+  }
+
+  const current = new Date(baseDate);
+  const currentWeekday = (current.getDay() + 6) % 7;
+
+  let minOffset = 7;
+  for (const targetWeekday of weekdayIndices) {
+    const offset = (targetWeekday - currentWeekday + 7) % 7;
+    if (offset < minOffset) {
+      minOffset = offset;
+    }
+  }
+
+  const nextDate = new Date(current);
+  nextDate.setDate(current.getDate() + minOffset);
+
+  const year = nextDate.getFullYear();
+  const month = String(nextDate.getMonth() + 1).padStart(2, "0");
+  const day = String(nextDate.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 export default function ChoreAddPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -129,8 +164,9 @@ export default function ChoreAddPage() {
 
     const repeatCycle: RepeatCycle = isRepeating ? "WEEKLY" : "NONE";
     const repeatPattern = isRepeating ? repeatWeekdays.join(",") : undefined;
+    const scheduledDate = isRepeating ? getNextRepeatDate(date, repeatWeekdays) : date;
     const basePayload = {
-      date,
+      date: scheduledDate,
       assignType,
       assigneeId: assignType === "MANUAL" ? selectedAssigneeId ?? undefined : undefined,
       repeatCycle,

@@ -23,4 +23,11 @@ export interface CalendarDayChores {
   chores: ApiChore[];
 }
 
+export interface DailyChoresResponse {
+  date: string;
+  totalCount: number;
+  completedCount: number;
+  chores: ApiChore[];
+}
+
 export type CalendarChoresResponse = ApiResponse<CalendarDayChores[]>;

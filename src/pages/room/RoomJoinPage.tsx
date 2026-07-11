@@ -41,9 +41,14 @@ export default function RoomJoinPage() {
 
   return (
     <main className="relative flex h-dvh w-full flex-col items-center bg-[#F5F5FA]">
-      <Header title="" onBack={() => navigate(-1)} />
+      <Header
+        title=""
+        onBack={() => navigate(-1)}
+        backgroundClassName="bg-[#F5F5FA]"
+        compact
+      />
 
-      <section className="flex w-full flex-col items-center justify-center gap-4 pb-[128px]">
+      <section className="flex w-full flex-col items-center justify-center gap-4 pt-1 pb-[128px]">
         <div className="w-[350px] rounded-[24px] bg-white p-6 shadow-[0_2px_20px_rgba(0, 0, 0, 0.07)] gap-4">
           <div className="flex h-[56px] w-[56px] items-center justify-center rounded-[16px] bg-brand/10">
             <IconKeyFilled size={24} className="text-[#F4B000]" />

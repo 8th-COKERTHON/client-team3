@@ -12,14 +12,15 @@ import ChoreCatalogBottomSheet from "../components/chore/ChoreCatalogBottomSheet
 import InviteCodeBottomSheet from "../components/bottomsheet/InviteCodeBottomSheet";
 import TaskDetailBottomSheet from "../components/bottomsheet/TaskDetailBottomSheet";
 import { getSavedUserNickname } from "../api/auth";
+import { fetchDailyChores } from "../api/calendar";
 import { getChoreBoard, updateChoreStatus } from "../api/chore";
 import { getGroupInviteCode, getGroupMembers, getSavedGroupId } from "../api/group";
-import type { ApiChore } from "../types/calendar";
 import type { ChoreBoardItem, ChoreStatus } from "../types/chore";
 import {
   buildFamilyMembers,
   buildMainChoreFromBoard,
   buildMainChoreFromCalendar,
+  expandBoardChoresForDate,
   getTodayIsoDate,
   type FamilyMember,
   type MainChore,
@@ -33,15 +34,29 @@ function sortChoresByDone(a: MainChore, b: MainChore) {
   return a.choreId - b.choreId;
 }
 
-function mapBoardToMainChores(board: ChoreBoardItem[], members: FamilyMember[]) {
-  return board.map((chore) => buildMainChoreFromBoard(chore, members)).sort(sortChoresByDone);
+function mergeMainChores(primary: MainChore[], fallback: MainChore[]) {
+  const merged = new Map<string, MainChore>();
+
+  for (const chore of primary) {
+    merged.set(`${chore.date}:${chore.id}`, chore);
+  }
+
+  for (const chore of fallback) {
+    const key = `${chore.date}:${chore.id}`;
+    if (!merged.has(key)) {
+      merged.set(key, chore);
+    }
+  }
+
+  return Array.from(merged.values()).sort(sortChoresByDone);
 }
 
 function MainPage() {
   const navigate = useNavigate();
   const groupId = useMemo(() => getSavedGroupId(), []);
   const [members, setMembers] = useState<FamilyMember[]>([]);
-  const [chores, setChores] = useState<MainChore[]>([]);
+  const [boardChores, setBoardChores] = useState<ChoreBoardItem[]>([]);
+  const [todayChores, setTodayChores] = useState<MainChore[]>([]);
   const [activeFilterId, setActiveFilterId] = useState<FilterId>("all");
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedDateChores, setSelectedDateChores] = useState<MainChore[]>([]);
@@ -56,14 +71,14 @@ function MainPage() {
 
   const todayIso = useMemo(() => getTodayIsoDate(), []);
   const savedUserNickname = useMemo(() => getSavedUserNickname(), []);
-  const todayChores = chores.filter((chore) => chore.date === todayIso);
   const visibleChores =
     activeFilterId === "all"
       ? todayChores
       : todayChores.filter((chore) => String(chore.assigneeId) === activeFilterId);
   const urgentChore = todayChores.find((chore) => !chore.done);
   const selectedChore: MainChore | null =
-    chores.find((chore) => chore.id === selectedChoreId) ??
+    visibleChores.find((chore) => chore.id === selectedChoreId) ??
+    todayChores.find((chore) => chore.id === selectedChoreId) ??
     selectedDateChores.find((chore) => chore.id === selectedChoreId) ??
     null;
 
@@ -82,9 +97,10 @@ function MainPage() {
       setIsLoading(true);
       setErrorMessage(null);
 
-      const [membersResponse, boardResponse] = await Promise.all([
+      const [membersResponse, boardResponse, dailyResponse] = await Promise.all([
         getGroupMembers(groupId),
         getChoreBoard(groupId),
+        fetchDailyChores(groupId, todayIso),
       ]);
 
       const nextMembers = buildFamilyMembers(membersResponse.data.members, savedUserNickname);
@@ -93,15 +109,18 @@ function MainPage() {
         ...boardResponse.data.inProgress,
         ...boardResponse.data.done,
       ];
+      const apiTodayChores = dailyResponse.chores.map((chore) => buildMainChoreFromCalendar(chore, nextMembers));
+      const fallbackTodayChores = expandBoardChoresForDate(boardItems, nextMembers, todayIso);
 
       setMembers(nextMembers);
-      setChores(mapBoardToMainChores(boardItems, nextMembers));
+      setBoardChores(boardItems);
+      setTodayChores(mergeMainChores(apiTodayChores, fallbackTodayChores));
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "메인 정보를 불러오지 못했어요.");
     } finally {
       setIsLoading(false);
     }
-  }, [groupId, savedUserNickname]);
+  }, [groupId, savedUserNickname, todayIso]);
 
   useEffect(() => {
     let cancelled = false;
@@ -127,13 +146,21 @@ function MainPage() {
   );
 
   const syncUpdatedChore = (updatedChore: ChoreBoardItem) => {
-    setSelectedDateChores((prev) =>
-      prev
+    setBoardChores((prev) => prev.map((chore) => (chore.id === updatedChore.id ? updatedChore : chore)));
+    setSelectedDateChores((prev) => {
+      const selectedDateValue = selectedDate;
+      if (!selectedDateValue) {
+        return prev;
+      }
+
+      return prev
         .map((chore) =>
-          chore.id === updatedChore.id ? buildMainChoreFromBoard(updatedChore, members) : chore,
+          chore.id === updatedChore.id
+            ? { ...buildMainChoreFromBoard(updatedChore, members), date: selectedDateValue }
+            : chore,
         )
-        .sort(sortChoresByDone),
-    );
+        .sort(sortChoresByDone);
+    });
     void refreshMainPageData();
   };
 
@@ -152,11 +179,9 @@ function MainPage() {
     }
   };
 
-  const handleDateSelect = (date: string, dayChores: ApiChore[]) => {
+  const handleDateSelect = (date: string, dayChores: MainChore[]) => {
     setSelectedDate(date);
-    setSelectedDateChores(
-      dayChores.map((chore) => buildMainChoreFromCalendar(chore, members)).sort(sortChoresByDone),
-    );
+    setSelectedDateChores(dayChores.sort(sortChoresByDone));
   };
 
   const handleOpenInviteSheet = async () => {
@@ -205,7 +230,14 @@ function MainPage() {
               onSelect={setActiveFilterId}
               onInviteClick={handleOpenInviteSheet}
             />
-            {groupId && <WeeklyCalendar groupId={groupId} onSelectDate={handleDateSelect} />}
+            {groupId && (
+              <WeeklyCalendar
+                groupId={groupId}
+                chores={boardChores}
+                members={members}
+                onSelectDate={handleDateSelect}
+              />
+            )}
           </div>
         </section>
 
