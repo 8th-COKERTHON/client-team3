@@ -9,7 +9,7 @@ import { ApiError } from '../../types/api'
 type SignUpField = 'name' | 'loginId' | 'password' | 'confirmPassword'
 
 function isValidPassword(password: string) {
-  return password.length >= 8 && /\d/.test(password)
+  return password.length >= 8 && /[a-zA-Z]/.test(password) && /\d/.test(password)
 }
 
 function SignUpPage() {
@@ -55,7 +55,7 @@ function SignUpPage() {
         return '비밀번호를 입력해주세요.'
       }
       if (!isValidPassword(nextForm.password)) {
-        return '비밀번호는 8자 이상이며 숫자를 포함해야 합니다.'
+        return '비밀번호는 8자 이상이며 영문과 숫자를 모두 포함해야 합니다.'
       }
       return ''
     }
@@ -149,7 +149,15 @@ function SignUpPage() {
       navigate('/login')
     } catch (error) {
       if (error instanceof ApiError) {
-        if (error.message.includes('아이디')) {
+        if (error.reasons) {
+          setFieldErrors((prev) => ({
+            ...prev,
+            name: error.reasons?.name ?? prev.name,
+            loginId: error.reasons?.loginId ?? prev.loginId,
+            password: error.reasons?.password ?? prev.password,
+            confirmPassword: error.reasons?.passwordCheck ?? prev.confirmPassword,
+          }))
+        } else if (error.message.includes('아이디')) {
           setFieldErrors((prev) => ({ ...prev, loginId: error.message }))
         } else {
           setErrorMessage(error.message)
