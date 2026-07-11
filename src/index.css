@@ -1,8 +1,8 @@
+@import "pretendard/dist/web/variable/pretendardvariable.css";
 @import "tailwindcss";
 
 @theme {
-  
-    /* font-size */
+  /* font-size */
   --text-headline: 24px;
   --text-title-01: 20px;
   --text-title-02: 18px;
@@ -17,9 +17,36 @@
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
 
+  --color-brand: #fd5f54;
   --color-white: #ffffff;
 
+  --color-gray-01: #ffffff;
+  --color-gray-02: #f4f4f4;
+  --color-gray-03: #eaeaea;
+  --color-gray-04: #e0e0e0;
+  --color-gray-05: #d5d5d5;
+  --color-gray-06: #c0c0c0;
+  --color-gray-07: #ababab;
+  --color-gray-08: #969696;
+  --color-gray-09: #5b5b5b;
+  --color-gray-10: #3d3d3d;
+  --color-gray-11: #2e2e2e;
+  --color-gray-12: #202020;
+  --color-gray-12: #111111;
+
+  /* Figma "Color Styles" - Brand(RED) / BLUE, 나머지 카테고리 색상은 확장 */
+  --color-brand: #fd5f54;
+  --color-info: #4f80c8;
+  --color-category-kitchen: var(--color-brand);
+  --color-category-laundry: var(--color-info);
+  --color-category-trash: #34c77b;
+  --color-category-cleaning: #a78bfa;
+  --color-category-bathroom: #f5a524;
+
+  /* 가족 구성원 식별 색상 (오늘의 과업 담당자 구분용) */
+  --color-member-green: #34c77b;
 }
 
 @layer base {
@@ -43,19 +70,29 @@
     --header-height: 44px; /* 상단 헤더의 기본 높이 */
     --bottom-nav-height: 72px; /* 하단 네비게이션 바의 기본 높이 */
 
-    --safe-top: env(safe-area-inset-top); /* 아이폰 노치 등 상단 안전 영역 여백 */
-    --safe-bottom: env(safe-area-inset-bottom); /* 아이폰 홈 인디케이터 등 하단 안전 영역 여백 */
+    --safe-top: env(
+      safe-area-inset-top
+    ); /* 아이폰 노치 등 상단 안전 영역 여백 */
+    --safe-bottom: env(
+      safe-area-inset-bottom
+    ); /* 아이폰 홈 인디케이터 등 하단 안전 영역 여백 */
   }
 
   * {
     box-sizing: border-box;
   }
-  
+
   body {
     margin: 0;
     min-width: 320px;
     min-height: var(--app-min-height);
-    font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    font-family:
+      "Pretendard Variable",
+      Pretendard,
+      -apple-system,
+      BlinkMacSystemFont,
+      system-ui,
+      sans-serif;
     font-weight: var(--font-weight-regular);
     font-size: var(--text-body-01);
   }
