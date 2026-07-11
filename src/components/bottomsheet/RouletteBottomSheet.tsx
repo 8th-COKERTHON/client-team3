@@ -263,7 +263,7 @@ export default function RouletteBottomSheet({
             onClick={winner ? handleSave : handleSpin}
             disabled={isLoading || isSpinning || rouletteMembers.length === 0}
           >
-            {isSpinning ? '돌리는 중...' : winner ? '저장하기' : '룰렛 돌리기'}
+            {isSpinning ? '돌리는 중...' : winner ? '확인하기' : '룰렛 돌리기'}
           </CTAButton>
         </div>
       </div>

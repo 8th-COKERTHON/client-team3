@@ -76,7 +76,10 @@ function ChoreItem({ chore, onToggle, onOpenDetail }: ChoreItemProps) {
           onToggle?.(chore.id, chore.done);
         }}
         aria-pressed={chore.done}
-        className="flex h-7 w-7 shrink-0 items-center justify-center text-gray-900"
+        disabled={!onToggle}
+        className={`flex h-7 w-7 shrink-0 items-center justify-center text-gray-900 ${
+          onToggle ? "" : "cursor-default"
+        }`}
       >
         {chore.done ? (
           <CheckCircle2 size={24} strokeWidth={1.5} />

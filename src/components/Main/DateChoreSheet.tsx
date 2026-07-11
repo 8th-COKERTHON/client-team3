@@ -23,7 +23,7 @@ function DateChoreSheet({ date, chores, onClose, onToggle }: DateChoreSheetProps
 
   return (
     <Layout onClose={onClose}>
-      <div className="flex max-h-[700px] flex-col pb-2">
+      <div className="flex max-h-[500px] flex-col pb-2">
         <div className="mb-2 flex shrink-0 items-center justify-between">
           <h2 className="text-title-02 leading-tight font-bold text-gray-900">{formatDateTitle(date)}</h2>
           <span className="rounded-full bg-[#F5F5FA] px-2.5 py-1 text-body-02 leading-none font-medium text-gray-400">

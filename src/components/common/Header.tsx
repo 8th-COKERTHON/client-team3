@@ -15,6 +15,7 @@ interface HeaderProps {
 function Header({ title, profileInitial = "?", onBack, showActions = false }: HeaderProps) {
   const navigate = useNavigate();
   const [hasUnread, setHasUnread] = useState(false);
+  const shouldBalanceTitle = Boolean(onBack && title);
 
   // 벨 빨간 점 표시 여부를 주기적으로 폴링
   useEffect(() => {
@@ -45,7 +46,9 @@ function Header({ title, profileInitial = "?", onBack, showActions = false }: He
   }, [showActions]);
   return (
     <header
-      className="relative flex w-full items-center justify-between bg-white px-5 pb-3"
+      className={`relative flex w-full items-center bg-white px-5 pb-3 ${
+        showActions ? "justify-between" : "justify-start"
+      }`}
       style={{ paddingTop: "calc(var(--safe-top) + 12px)" }}
     >
       {onBack ? (
@@ -60,15 +63,14 @@ function Header({ title, profileInitial = "?", onBack, showActions = false }: He
       ) : null}
 
       {title ? (
-        <span className={`text-title-01 leading-tight font-bold text-gray-900 ${onBack ? "mx-auto" : ""}`}>
+        <span
+          className={`text-title-01 leading-tight font-bold text-gray-900 ${
+            shouldBalanceTitle ? "mx-auto" : ""
+          }`}
+        >
           {title}
         </span>
-      ) : (
-        <div className="flex items-baseline gap-0.5">
-          <span className="text-title-02 leading-none font-bold text-gray-900">한땀</span>
-          <span className="text-body-02 leading-none font-bold text-brand">績</span>
-        </div>
-      )}
+      ) : null}
 
       {showActions ? (
         <div className="flex items-center gap-2">
@@ -87,9 +89,10 @@ function Header({ title, profileInitial = "?", onBack, showActions = false }: He
             {profileInitial}
           </span>
         </div>
-      ) : (
+      ) : shouldBalanceTitle ? (
         <div className="w-8 shrink-0" />
-      )}
+      ) : null
+      }
     </header>
   );
 }

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
 import Header from "../components/common/Header";
@@ -73,56 +73,53 @@ function MainPage() {
     }
   }, [groupId, navigate]);
 
-  useEffect(() => {
+  const refreshMainPageData = useCallback(async () => {
     if (!groupId) {
       return;
     }
 
-    const currentGroupId = groupId;
+    try {
+      setIsLoading(true);
+      setErrorMessage(null);
+
+      const [membersResponse, boardResponse] = await Promise.all([
+        getGroupMembers(groupId),
+        getChoreBoard(groupId),
+      ]);
+
+      const nextMembers = buildFamilyMembers(membersResponse.data.members, savedUserNickname);
+      const boardItems = [
+        ...boardResponse.data.scheduled,
+        ...boardResponse.data.inProgress,
+        ...boardResponse.data.done,
+      ];
+
+      setMembers(nextMembers);
+      setChores(mapBoardToMainChores(boardItems, nextMembers));
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "메인 정보를 불러오지 못했어요.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [groupId, savedUserNickname]);
+
+  useEffect(() => {
     let cancelled = false;
 
-    async function fetchMainPageData() {
-      try {
-        setIsLoading(true);
-        setErrorMessage(null);
+    async function runRefresh() {
+      await refreshMainPageData();
 
-        const [membersResponse, boardResponse] = await Promise.all([
-          getGroupMembers(currentGroupId),
-          getChoreBoard(currentGroupId),
-        ]);
-
-        if (cancelled) {
-          return;
-        }
-
-        const nextMembers = buildFamilyMembers(membersResponse.data.members, savedUserNickname);
-        const boardItems = [
-          ...boardResponse.data.scheduled,
-          ...boardResponse.data.inProgress,
-          ...boardResponse.data.done,
-        ];
-
-        setMembers(nextMembers);
-        setChores(mapBoardToMainChores(boardItems, nextMembers));
-      } catch (error) {
-        if (cancelled) {
-          return;
-        }
-
-        setErrorMessage(error instanceof Error ? error.message : "메인 정보를 불러오지 못했어요.");
-      } finally {
-        if (!cancelled) {
-          setIsLoading(false);
-        }
+      if (cancelled) {
+        return;
       }
     }
 
-    void fetchMainPageData();
+    void runRefresh();
 
     return () => {
       cancelled = true;
     };
-  }, [groupId, savedUserNickname]);
+  }, [refreshMainPageData]);
 
   const profileInitial = useMemo(
     () => members.find((member) => member.isMe)?.fullName.slice(0, 1) ?? savedUserNickname?.slice(0, 1) ?? "?",
@@ -130,13 +127,6 @@ function MainPage() {
   );
 
   const syncUpdatedChore = (updatedChore: ChoreBoardItem) => {
-    setChores((prev) =>
-      prev
-        .map((chore) =>
-          chore.id === updatedChore.id ? buildMainChoreFromBoard(updatedChore, members) : chore,
-        )
-        .sort(sortChoresByDone),
-    );
     setSelectedDateChores((prev) =>
       prev
         .map((chore) =>
@@ -144,6 +134,7 @@ function MainPage() {
         )
         .sort(sortChoresByDone),
     );
+    void refreshMainPageData();
   };
 
   const handleToggle = async (groupChoreId: number, done: boolean) => {
@@ -228,7 +219,6 @@ function MainPage() {
 
         <ChoreList
           chores={visibleChores}
-          onToggle={handleToggle}
           onOpenDetail={(chore) => setSelectedChoreId(chore.id)}
         />
       </div>
